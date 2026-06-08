@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.jarvis/schemas/command.schema.json",
+  "title": "JarvisCommand",
+  "type": "object",
+  "required": ["intent", "source_text", "detected_language", "response_language"],
+  "properties": {
+    "intent": {
+      "type": "string",
+      "examples": ["call_contact", "open_app", "set_response_language"]
+    },
+    "source_text": {
+      "type": "string"
+    },
+    "target": {
+      "type": ["string", "null"]
+    },
+    "detected_language": {
+      "type": "string",
+      "enum": ["en", "ta", "ta-en", "unknown"]
+    },
+    "response_language": {
+      "type": "string",
+      "enum": ["en", "ta", "ta-en"]
+    },
+    "speaker_role": {
+      "type": "string",
+      "enum": ["owner", "trusted", "unknown"],
+      "default": "unknown"
+    },
+    "requires_confirmation": {
+      "type": "boolean",
+      "default": false
+    },
+    "slots": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
+

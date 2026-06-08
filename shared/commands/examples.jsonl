@@ -1,0 +1,7 @@
+{"input":"jarvis call appa","output":{"intent":"call_contact","target":"appa","detected_language":"en","response_language":"en"}}
+{"input":"appa ku call pannu","output":{"intent":"call_contact","target":"appa","detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis open whatsapp","output":{"intent":"open_app","target":"whatsapp","detected_language":"en","response_language":"en"}}
+{"input":"whatsapp open pannu","output":{"intent":"open_app","target":"whatsapp","detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"reply in tamil","output":{"intent":"set_response_language","target":"ta","detected_language":"en","response_language":"ta"}}
+{"input":"english la reply pannu","output":{"intent":"set_response_language","target":"en","detected_language":"ta-en","response_language":"en"}}
+

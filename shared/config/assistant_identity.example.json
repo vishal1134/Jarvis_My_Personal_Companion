@@ -1,0 +1,17 @@
+{
+  "owner": {
+    "name": "Boss",
+    "title": "sir",
+    "preferred_response_language": "auto"
+  },
+  "assistant": {
+    "active_names": ["jarvis"],
+    "inactive_old_names": [],
+    "max_active_names": 3
+  },
+  "greeting": {
+    "first_greeting_enabled": true,
+    "language_mode": "auto"
+  }
+}
+
