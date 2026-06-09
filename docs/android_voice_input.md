@@ -30,10 +30,10 @@ Jarvis open calculator
 Jarvis open whatsapp
 Jarvis call appa
 appa ku call pannu
+Jarvis read notifications
 ```
 
 ## Current Limitation
 
 This is not always-listening wake-word mode yet. It is push-to-talk. Wake-name
 and always-listening service come later.
-

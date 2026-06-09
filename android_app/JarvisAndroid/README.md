@@ -55,6 +55,15 @@ then send the command again.
 Notification reading is planned next. It requires Android Notification Listener
 access, which must be enabled manually in phone settings.
 
+Current notification command:
+
+```text
+Jarvis read notifications
+```
+
+The first time, Jarvis opens Android's notification access screen. Enable Jarvis
+there, return to the app, then run the command again.
+
 ## Setup
 
 1. Install Android Studio.

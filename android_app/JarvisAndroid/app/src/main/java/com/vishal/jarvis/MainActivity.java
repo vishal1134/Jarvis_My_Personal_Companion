@@ -44,6 +44,7 @@ public class MainActivity extends Activity {
     private final JarvisServerClient serverClient = new JarvisServerClient();
     private AppLauncher appLauncher;
     private ContactCaller contactCaller;
+    private NotificationReader notificationReader;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
@@ -57,6 +58,7 @@ public class MainActivity extends Activity {
         voiceSpinner = findViewById(R.id.voiceSpinner);
         appLauncher = new AppLauncher(this);
         contactCaller = new ContactCaller(this);
+        notificationReader = new NotificationReader(this);
         Button speakButton = findViewById(R.id.speakButton);
         Button sampleButton = findViewById(R.id.sampleButton);
         Button micButton = findViewById(R.id.micButton);
@@ -276,6 +278,11 @@ public class MainActivity extends Activity {
     }
 
     private void handleJarvisResult(JarvisResult result) {
+        if ("read_notifications".equals(result.getIntent())) {
+            handleReadNotifications();
+            return;
+        }
+
         speakResponse(result.getSpokenResponse());
 
         if ("open_app".equals(result.getIntent())) {
@@ -289,6 +296,16 @@ public class MainActivity extends Activity {
         if ("call_contact".equals(result.getIntent())) {
             handleCallContact(result.getTarget());
         }
+    }
+
+    private void handleReadNotifications() {
+        if (!notificationReader.hasNotificationAccess()) {
+            speakResponse(getString(R.string.notification_access_needed));
+            notificationReader.openNotificationAccessSettings();
+            return;
+        }
+
+        speakResponse(notificationReader.summarizeNotifications("sir"));
     }
 
     private void handleCallContact(String target) {

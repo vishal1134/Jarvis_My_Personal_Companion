@@ -36,6 +36,11 @@ class RuleParserTest(unittest.TestCase):
         self.assertEqual(command.intent, "set_response_language")
         self.assertEqual(command.response_language, "ta")
 
+    def test_read_notifications(self):
+        command = parse_command("Jarvis read notifications")
+
+        self.assertEqual(command.intent, "read_notifications")
+
     def test_language_detection(self):
         self.assertEqual(detect_language("hello"), "en")
         self.assertEqual(detect_language("appa ku call pannu"), "ta-en")

@@ -66,3 +66,24 @@ Anything outside these patterns returns:
 ```text
 I did not understand that yet, sir.
 ```
+
+## Notifications
+
+```text
+Jarvis read notifications
+notifications read pannu
+notifications padi
+```
+
+Current Android behavior:
+
+```text
+1. If notification access is missing, Jarvis opens the settings screen.
+2. After access is enabled, Jarvis summarizes active notifications by app.
+```
+
+Current privacy rule:
+
+```text
+Jarvis reads counts and app names only, not private notification message text.
+```

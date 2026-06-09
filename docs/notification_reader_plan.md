@@ -26,9 +26,9 @@ Jarvis should:
 
 ```text
 1. Check notification access.
-2. If not granted, open the notification access settings screen.
-3. If granted, read recent notification titles/app names aloud.
-4. Avoid reading sensitive message content until owner security is added.
+2. If not granted, open the notification access settings screen. Done for MVP.
+3. If granted, read recent notification app counts aloud. Done for MVP.
+4. Avoid reading sensitive message content until owner security is added. Done for MVP.
 ```
 
 ## Privacy Rule
@@ -41,4 +41,3 @@ You have 2 WhatsApp notifications and 1 missed call.
 ```
 
 Later, owner-only mode can read more details.
-

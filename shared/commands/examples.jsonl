@@ -6,3 +6,5 @@
 {"input":"calculator open pannu","output":{"intent":"open_app","target":"calculator","detected_language":"ta-en","response_language":"ta-en"}}
 {"input":"reply in tamil","output":{"intent":"set_response_language","target":"ta","detected_language":"en","response_language":"ta"}}
 {"input":"english la reply pannu","output":{"intent":"set_response_language","target":"en","detected_language":"ta-en","response_language":"en"}}
+{"input":"jarvis read notifications","output":{"intent":"read_notifications","target":null,"detected_language":"en","response_language":"en"}}
+{"input":"notifications read pannu","output":{"intent":"read_notifications","target":null,"detected_language":"ta-en","response_language":"ta-en"}}

@@ -86,6 +86,14 @@ def parse_command(text: str, response_language: str = "auto") -> ParsedCommand:
             target="en",
         )
 
+    if _is_read_notifications_command(normalized):
+        return ParsedCommand(
+            intent="read_notifications",
+            source_text=source,
+            detected_language=detected_language,
+            response_language=final_response_language,
+        )
+
     call_target = _extract_call_target(normalized)
     if call_target:
         return ParsedCommand(
@@ -129,6 +137,17 @@ def _extract_call_target(text: str) -> str | None:
             return target or None
 
     return None
+
+
+def _is_read_notifications_command(text: str) -> bool:
+    cleaned = _remove_wake_name(text)
+    return (
+        "read notifications" in cleaned
+        or "notification read" in cleaned
+        or "notifications read" in cleaned
+        or "notification padi" in cleaned
+        or "notifications padi" in cleaned
+    )
 
 
 def _extract_app_target(text: str) -> str | None:

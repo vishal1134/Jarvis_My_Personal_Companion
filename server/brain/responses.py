@@ -58,5 +58,11 @@ def response_for(command: dict[str, object], title: str) -> str:
         if target == "en":
             return f"Of course, {title}. I will respond in English."
 
-    return f"I did not understand that yet, {title}."
+    if intent == "read_notifications":
+        if language == "ta":
+            return f"Notifications check pannuren, {title}."
+        if language == "ta-en":
+            return f"Notifications check pannuren, {title}."
+        return f"Checking notifications, {title}."
 
+    return f"I did not understand that yet, {title}."
