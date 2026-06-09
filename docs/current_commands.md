@@ -43,6 +43,20 @@ The Android app only speaks the response for now. It does not open the real app
 yet on older builds. The current Android MVP now attempts to open the matching
 installed app.
 
+## YouTube Search
+
+```text
+Jarvis search vijay songs in youtube
+Jarvis youtube search tamil songs
+Jarvis youtube la tamil songs search pannu
+```
+
+Current Android behavior:
+
+```text
+Jarvis speaks the response, then opens YouTube search results.
+```
+
 ## Response Language
 
 ```text
@@ -87,3 +101,16 @@ Current privacy rule:
 ```text
 Jarvis reads counts and app names only, not private notification message text.
 ```
+
+## Assistant Names
+
+```text
+Jarvis change your name to Friday
+Jarvis rename yourself to Friday
+Jarvis your name is now Friday
+Jarvis add Friday as your name
+Jarvis remove Friday
+```
+
+Jarvis supports up to 3 active names. Removed or changed names are kept as old
+names so Jarvis can remind you of the current name.

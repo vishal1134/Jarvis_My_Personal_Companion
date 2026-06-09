@@ -73,6 +73,81 @@ class MemoryStore:
         self.save(memory)
         return memory
 
+    def change_assistant_name(self, new_name: str) -> dict[str, Any]:
+        memory = self.load()
+        assistant = memory["identity"]["assistant"]
+        old_active_names = assistant["active_names"]
+        old_names = assistant["inactive_old_names"]
+
+        for old_name in old_active_names:
+            if old_name != new_name and old_name not in old_names:
+                old_names.append(old_name)
+
+        assistant["active_names"] = [new_name]
+        assistant["inactive_old_names"] = old_names[-20:]
+        self.save(memory)
+        return memory
+
+    def add_assistant_name(self, name: str) -> tuple[dict[str, Any], bool]:
+        memory = self.load()
+        assistant = memory["identity"]["assistant"]
+        active_names = assistant["active_names"]
+        max_active_names = assistant.get("max_active_names", 3)
+
+        if name in active_names:
+            return memory, True
+
+        if len(active_names) >= max_active_names:
+            return memory, False
+
+        active_names.append(name)
+        if name in assistant["inactive_old_names"]:
+            assistant["inactive_old_names"].remove(name)
+
+        self.save(memory)
+        return memory, True
+
+    def remove_assistant_name(self, name: str) -> tuple[dict[str, Any], bool]:
+        memory = self.load()
+        assistant = memory["identity"]["assistant"]
+        active_names = assistant["active_names"]
+
+        if name not in active_names or len(active_names) <= 1:
+            return memory, False
+
+        active_names.remove(name)
+        if name not in assistant["inactive_old_names"]:
+            assistant["inactive_old_names"].append(name)
+
+        self.save(memory)
+        return memory, True
+
+    def find_cached_command(self, source_text: str, response_language: str) -> dict[str, Any] | None:
+        normalized_source = _normalize_phrase(source_text)
+        memory = self.load()
+
+        for cached in memory["frequent_commands"].values():
+            for variant in cached.get("phrase_variants", []):
+                if _normalize_phrase(variant) == normalized_source:
+                    return {
+                        "intent": cached["intent"],
+                        "source_text": source_text,
+                        "target": cached.get("target"),
+                        "detected_language": cached.get("detected_language", "unknown"),
+                        "response_language": (
+                            response_language
+                            if response_language != "auto"
+                            else cached.get("response_language", "en")
+                        ),
+                        "speaker_role": "unknown",
+                        "requires_confirmation": False,
+                        "slots": {
+                            "cache_hit": "true",
+                        },
+                    }
+
+        return None
+
     def record_interaction(
         self,
         source_text: str,
@@ -101,6 +176,8 @@ class MemoryStore:
                 {
                     "intent": command["intent"],
                     "target": command.get("target"),
+                    "detected_language": command.get("detected_language", "unknown"),
+                    "response_language": command.get("response_language", "en"),
                     "usage_count": 0,
                     "last_used_at": None,
                     "phrase_variants": [],
@@ -128,9 +205,14 @@ class MemoryStore:
 def _command_cache_key(command: dict[str, Any]) -> str | None:
     intent = command.get("intent")
     target = command.get("target")
-    if not intent or intent == "unknown":
+    cacheable_intents = {"call_contact", "open_app", "read_notifications", "search_youtube"}
+    if not intent or intent not in cacheable_intents:
         return None
     return f"{intent}:{target or ''}"
+
+
+def _normalize_phrase(phrase: str) -> str:
+    return " ".join(phrase.lower().strip().split())
 
 
 def _deep_merge(base: dict[str, Any], updates: dict[str, Any]) -> dict[str, Any]:
@@ -140,4 +222,3 @@ def _deep_merge(base: dict[str, Any], updates: dict[str, Any]) -> dict[str, Any]
         else:
             base[key] = value
     return base
-

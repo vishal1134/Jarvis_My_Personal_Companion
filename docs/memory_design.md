@@ -58,9 +58,20 @@ Frequently used commands are cached to reduce response time.
 }
 ```
 
+The server now checks exact cached phrase variants before using the parser. Cache
+is used only for stable action commands:
+
+```text
+call_contact
+open_app
+read_notifications
+search_youtube
+```
+
+Identity and language-setting commands are not cached.
+
 ## Security Rule
 
 The owner can change identity, memory, assistant names, and sensitive settings.
 Trusted users may get limited control. Unknown speakers should not access private
 memory or risky actions.
-

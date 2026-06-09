@@ -52,6 +52,11 @@ def response_for(command: dict[str, object], title: str) -> str:
             return f"{target} open pannuren, {title}."
         return f"Opening {target}, {title}."
 
+    if intent == "search_youtube":
+        if language in {"ta", "ta-en"}:
+            return f"YouTube la {target} search pannuren, {title}."
+        return f"Searching YouTube for {target}, {title}."
+
     if intent == "set_response_language":
         if target == "ta":
             return f"Sari {title}, inimey Tamil la reply pannuren."
@@ -64,5 +69,30 @@ def response_for(command: dict[str, object], title: str) -> str:
         if language == "ta-en":
             return f"Notifications check pannuren, {title}."
         return f"Checking notifications, {title}."
+
+    if intent == "change_assistant_name":
+        if language in {"ta", "ta-en"}:
+            return f"Sari {title}, inimey ennai {target} nu koopidunga."
+        return f"Okay {title}, you can call me {target} now."
+
+    if intent == "add_assistant_name":
+        success = command.get("slots", {}).get("name_update_success") != "false"
+        if not success:
+            return f"I can keep only three active names, {title}."
+        if language in {"ta", "ta-en"}:
+            return f"Sari {title}, {target} name um add panniten."
+        return f"Okay {title}, I will also respond to {target}."
+
+    if intent == "remove_assistant_name":
+        success = command.get("slots", {}).get("name_update_success") != "false"
+        if not success:
+            return f"I could not remove that name, {title}."
+        if language in {"ta", "ta-en"}:
+            return f"Sari {title}, {target} name remove panniten."
+        return f"Okay {title}, I removed {target} from my active names."
+
+    if intent == "old_assistant_name_used":
+        active_name = command.get("slots", {}).get("active_name", "jarvis")
+        return f"You have changed my name to {active_name}, {title}."
 
     return f"I did not understand that yet, {title}."

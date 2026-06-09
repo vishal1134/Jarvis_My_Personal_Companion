@@ -30,4 +30,5 @@
     <string name="speech_error">Speech error: %1$d</string>
     <string name="no_speech_match">I could not hear a clear command.</string>
     <string name="notification_access_needed">Please enable notification access for Jarvis, sir.</string>
+    <string name="youtube_search_failed">I could not open YouTube search.</string>
 </resources>

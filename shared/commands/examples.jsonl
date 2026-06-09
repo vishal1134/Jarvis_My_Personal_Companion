@@ -4,7 +4,11 @@
 {"input":"whatsapp open pannu","output":{"intent":"open_app","target":"whatsapp","detected_language":"ta-en","response_language":"ta-en"}}
 {"input":"jarvis open calculator","output":{"intent":"open_app","target":"calculator","detected_language":"en","response_language":"en"}}
 {"input":"calculator open pannu","output":{"intent":"open_app","target":"calculator","detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis search vijay songs in youtube","output":{"intent":"search_youtube","target":"vijay songs","detected_language":"en","response_language":"en"}}
+{"input":"jarvis youtube la tamil songs search pannu","output":{"intent":"search_youtube","target":"tamil songs","detected_language":"ta-en","response_language":"ta-en"}}
 {"input":"reply in tamil","output":{"intent":"set_response_language","target":"ta","detected_language":"en","response_language":"ta"}}
 {"input":"english la reply pannu","output":{"intent":"set_response_language","target":"en","detected_language":"ta-en","response_language":"en"}}
 {"input":"jarvis read notifications","output":{"intent":"read_notifications","target":null,"detected_language":"en","response_language":"en"}}
 {"input":"notifications read pannu","output":{"intent":"read_notifications","target":null,"detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis change your name to friday","output":{"intent":"change_assistant_name","target":"friday","detected_language":"en","response_language":"en"}}
+{"input":"jarvis add friday as your name","output":{"intent":"add_assistant_name","target":"friday","detected_language":"en","response_language":"en"}}

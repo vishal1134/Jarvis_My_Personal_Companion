@@ -45,6 +45,7 @@ public class MainActivity extends Activity {
     private AppLauncher appLauncher;
     private ContactCaller contactCaller;
     private NotificationReader notificationReader;
+    private YouTubeSearcher youTubeSearcher;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
@@ -59,6 +60,7 @@ public class MainActivity extends Activity {
         appLauncher = new AppLauncher(this);
         contactCaller = new ContactCaller(this);
         notificationReader = new NotificationReader(this);
+        youTubeSearcher = new YouTubeSearcher(this);
         Button speakButton = findViewById(R.id.speakButton);
         Button sampleButton = findViewById(R.id.sampleButton);
         Button micButton = findViewById(R.id.micButton);
@@ -289,6 +291,14 @@ public class MainActivity extends Activity {
             boolean opened = appLauncher.openApp(result.getTarget());
             if (!opened) {
                 statusText.setText(getString(R.string.app_not_found, result.getTarget()));
+            }
+            return;
+        }
+
+        if ("search_youtube".equals(result.getIntent())) {
+            boolean opened = youTubeSearcher.search(result.getTarget());
+            if (!opened) {
+                statusText.setText(R.string.youtube_search_failed);
             }
             return;
         }

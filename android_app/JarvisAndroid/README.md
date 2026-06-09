@@ -52,6 +52,15 @@ appa ku call pannu
 The first time, Android will ask for Contacts and Phone permissions. Allow them,
 then send the command again.
 
+It can search YouTube:
+
+```text
+Jarvis search vijay songs in youtube
+Jarvis youtube la tamil songs search pannu
+```
+
+Jarvis opens the YouTube app when available and falls back to a browser.
+
 Notification reading is planned next. It requires Android Notification Listener
 access, which must be enabled manually in phone settings.
 
