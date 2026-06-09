@@ -1,0 +1,66 @@
+# Current Commands
+
+These are the commands Jarvis understands in the current MVP.
+
+## Calling
+
+```text
+Jarvis call appa
+call appa
+appa ku call pannu
+appa koopidu
+```
+
+Current output:
+
+```text
+Calling appa, sir.
+appa ku call pannuren, sir.
+```
+
+The Android app only speaks the response for now. It does not place the real
+phone call yet.
+
+## Open App
+
+```text
+Jarvis open whatsapp
+open whatsapp
+whatsapp open pannu
+whatsapp thirakku
+```
+
+Current output:
+
+```text
+Opening whatsapp, sir.
+whatsapp open pannuren, sir.
+```
+
+The Android app only speaks the response for now. It does not open the real app
+yet.
+
+## Response Language
+
+```text
+reply in tamil
+tamil la reply
+reply in english
+english la reply pannu
+```
+
+Current output:
+
+```text
+Sari sir, inimey Tamil la reply pannuren.
+Of course, sir. I will respond in English.
+```
+
+## Unknown Commands
+
+Anything outside these patterns returns:
+
+```text
+I did not understand that yet, sir.
+```
+

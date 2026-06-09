@@ -14,6 +14,15 @@ Type command
 This text box is only for early testing. The final Jarvis flow will be
 voice-to-voice with actions.
 
+The app includes a Jarvis voice selector. Android does not always label voices
+as male or female, so choose the male-sounding installed voice for Jarvis. Later
+we will add separate profiles:
+
+```text
+Jarvis = male voice
+Friday = female voice
+```
+
 ## Setup
 
 1. Install Android Studio.
@@ -51,4 +60,3 @@ http://192.168.1.10:8000
 
 Do not use `127.0.0.1` on the phone. On Android, that points to the phone
 itself, not your laptop.
-
