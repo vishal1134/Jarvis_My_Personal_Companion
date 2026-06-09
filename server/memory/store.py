@@ -1,0 +1,143 @@
+from __future__ import annotations
+
+import json
+from copy import deepcopy
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+
+DEFAULT_MEMORY: dict[str, Any] = {
+    "identity": {
+        "owner": {
+            "name": "Boss",
+            "title": "sir",
+            "preferred_response_language": "auto",
+        },
+        "assistant": {
+            "active_names": ["jarvis"],
+            "inactive_old_names": [],
+            "max_active_names": 3,
+        },
+    },
+    "daily": {
+        "last_greeting_date": None,
+        "last_interaction_at": None,
+    },
+    "frequent_commands": {},
+    "conversation_log": [],
+}
+
+
+@dataclass
+class MemoryStore:
+    path: Path
+
+    @classmethod
+    def default(cls) -> "MemoryStore":
+        root = Path(__file__).resolve().parents[2]
+        return cls(root / "data" / "memory" / "jarvis_memory.json")
+
+    def load(self) -> dict[str, Any]:
+        if not self.path.exists():
+            return deepcopy(DEFAULT_MEMORY)
+
+        with self.path.open("r", encoding="utf-8") as file:
+            stored = json.load(file)
+
+        return _deep_merge(deepcopy(DEFAULT_MEMORY), stored)
+
+    def save(self, memory: dict[str, Any]) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with self.path.open("w", encoding="utf-8") as file:
+            json.dump(memory, file, indent=2, ensure_ascii=False)
+            file.write("\n")
+
+    def update_identity(
+        self,
+        owner_name: str | None = None,
+        owner_title: str | None = None,
+        preferred_response_language: str | None = None,
+    ) -> dict[str, Any]:
+        memory = self.load()
+        owner = memory["identity"]["owner"]
+
+        if owner_name:
+            owner["name"] = owner_name
+        if owner_title:
+            owner["title"] = owner_title
+        if preferred_response_language:
+            owner["preferred_response_language"] = preferred_response_language
+
+        self.save(memory)
+        return memory
+
+    def record_interaction(
+        self,
+        source_text: str,
+        command: dict[str, Any],
+        spoken_response: str,
+        now: datetime,
+    ) -> dict[str, Any]:
+        memory = self.load()
+        timestamp = now.isoformat(timespec="seconds")
+
+        memory["daily"]["last_interaction_at"] = timestamp
+        memory["conversation_log"].append(
+            {
+                "timestamp": timestamp,
+                "source_text": source_text,
+                "command": command,
+                "spoken_response": spoken_response,
+            }
+        )
+        memory["conversation_log"] = memory["conversation_log"][-200:]
+
+        cache_key = _command_cache_key(command)
+        if cache_key:
+            cached = memory["frequent_commands"].setdefault(
+                cache_key,
+                {
+                    "intent": command["intent"],
+                    "target": command.get("target"),
+                    "usage_count": 0,
+                    "last_used_at": None,
+                    "phrase_variants": [],
+                },
+            )
+            cached["usage_count"] += 1
+            cached["last_used_at"] = timestamp
+            if source_text not in cached["phrase_variants"]:
+                cached["phrase_variants"].append(source_text)
+                cached["phrase_variants"] = cached["phrase_variants"][-10:]
+
+        self.save(memory)
+        return memory
+
+    def should_greet(self, today: str) -> bool:
+        memory = self.load()
+        return memory["daily"].get("last_greeting_date") != today
+
+    def mark_greeted(self, today: str) -> None:
+        memory = self.load()
+        memory["daily"]["last_greeting_date"] = today
+        self.save(memory)
+
+
+def _command_cache_key(command: dict[str, Any]) -> str | None:
+    intent = command.get("intent")
+    target = command.get("target")
+    if not intent or intent == "unknown":
+        return None
+    return f"{intent}:{target or ''}"
+
+
+def _deep_merge(base: dict[str, Any], updates: dict[str, Any]) -> dict[str, Any]:
+    for key, value in updates.items():
+        if isinstance(value, dict) and isinstance(base.get(key), dict):
+            _deep_merge(base[key], value)
+        else:
+            base[key] = value
+    return base
+

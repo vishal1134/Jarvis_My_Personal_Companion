@@ -41,3 +41,13 @@ Phone starts the call
 Jarvis replies by voice
 ```
 
+## Voice Preview
+
+On Windows, after the server is running, Jarvis can speak a response aloud:
+
+```powershell
+.\scripts\voice\speak_jarvis_response.ps1 -Text "Jarvis call appa"
+```
+
+This is an early laptop voice preview. The Android app will later speak the same
+`spoken_response` using Android Text-to-Speech.

@@ -35,17 +35,14 @@ TAMIL_HINTS = (
     "pesu",
     "koopidu",
     "thirakku",
-    "த",
-    "க",
-    "ப",
-    "ண",
-    "ழ",
 )
 
 
 def detect_language(text: str) -> str:
     normalized = text.lower()
-    has_tamil_hint = any(hint in normalized for hint in TAMIL_HINTS)
+    has_tamil_hint = any(hint in normalized for hint in TAMIL_HINTS) or any(
+        _is_tamil_character(ch) for ch in normalized
+    )
     has_english_hint = any(ch.isascii() and ch.isalpha() for ch in normalized)
 
     if has_tamil_hint and has_english_hint:
@@ -55,6 +52,10 @@ def detect_language(text: str) -> str:
     if has_english_hint:
         return "en"
     return "unknown"
+
+
+def _is_tamil_character(character: str) -> bool:
+    return "\u0b80" <= character <= "\u0bff"
 
 
 def parse_command(text: str, response_language: str = "auto") -> ParsedCommand:

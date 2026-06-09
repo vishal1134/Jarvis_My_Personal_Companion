@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Jarvis</string>
+    <string name="subtitle">Voice response bridge for your local Jarvis server.</string>
+    <string name="server_url_hint">Server URL</string>
+    <string name="default_server_url">http://192.168.1.10:8000</string>
+    <string name="command_hint">Command</string>
+    <string name="sample_command">Jarvis call appa</string>
+    <string name="send_to_jarvis">Send</string>
+    <string name="sample">Sample</string>
+    <string name="status_waiting">Waiting for Jarvis.</string>
+    <string name="tts_ready">Jarvis voice is ready.</string>
+    <string name="tts_failed">Jarvis voice failed to start.</string>
+    <string name="enter_server_url">Enter your laptop server URL.</string>
+    <string name="enter_command">Enter a command.</string>
+    <string name="contacting_jarvis">Contacting Jarvis.</string>
+    <string name="server_error">Server error: %1$s</string>
+</resources>
+

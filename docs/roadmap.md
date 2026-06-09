@@ -16,13 +16,15 @@
 - Open app action.
 - First greeting of the day.
 - Owner name and title memory.
+- Laptop voice preview script. Done for MVP support.
 
 ## Phase 3: Local Server
 
-- FastAPI server.
-- Health check from Android app.
-- Command understanding endpoint.
-- Local memory API.
+- FastAPI server. Done for MVP.
+- Health check from Android app. Done for MVP.
+- Command understanding endpoint. Done for MVP.
+- Local memory API. Done for MVP.
+- Daily greeting and spoken-response generation. Done for MVP.
 - Dataset upload endpoint.
 
 ## Phase 4: Learning
@@ -51,4 +53,3 @@
 - Accessibility service for personal automation.
 - Shizuku/ADB bridge if needed.
 - Root-only features only if a real blocker appears.
-
