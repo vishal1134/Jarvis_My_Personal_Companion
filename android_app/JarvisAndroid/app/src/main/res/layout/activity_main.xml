@@ -67,9 +67,17 @@
             android:orientation="horizontal">
 
             <Button
+                android:id="@+id/micButton"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="@string/mic" />
+
+            <Button
                 android:id="@+id/speakButton"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
+                android:layout_marginStart="10dp"
                 android:layout_weight="1"
                 android:text="@string/send_to_jarvis" />
 

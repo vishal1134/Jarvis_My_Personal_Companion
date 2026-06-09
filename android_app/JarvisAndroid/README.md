@@ -14,6 +14,16 @@ Type command
 This text box is only for early testing. The final Jarvis flow will be
 voice-to-voice with actions.
 
+The current app also includes a push-to-talk Mic button:
+
+```text
+Tap Mic
+  -> speak command
+  -> recognized text is sent to Jarvis
+  -> Jarvis speaks
+  -> Android performs the action
+```
+
 The app includes a Jarvis voice selector. Android does not always label voices
 as male or female, so choose the male-sounding installed voice for Jarvis. Later
 we will add separate profiles:
@@ -31,6 +41,16 @@ The app now attempts to open installed apps for commands like:
 Jarvis open whatsapp
 Jarvis open calculator
 ```
+
+It also attempts to call contacts:
+
+```text
+Jarvis call appa
+appa ku call pannu
+```
+
+The first time, Android will ask for Contacts and Phone permissions. Allow them,
+then send the command again.
 
 Notification reading is planned next. It requires Android Notification Listener
 access, which must be enabled manually in phone settings.

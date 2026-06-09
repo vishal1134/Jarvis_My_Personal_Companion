@@ -18,8 +18,8 @@ Calling appa, sir.
 appa ku call pannuren, sir.
 ```
 
-The Android app only speaks the response for now. It does not place the real
-phone call yet.
+The current Android MVP now attempts to find the contact and start a real phone
+call after Jarvis speaks.
 
 ## Open App
 

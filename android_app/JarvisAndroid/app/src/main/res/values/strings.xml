@@ -7,6 +7,7 @@
     <string name="command_hint">Command</string>
     <string name="sample_command">Jarvis call appa</string>
     <string name="jarvis_voice">Jarvis voice</string>
+    <string name="mic">Mic</string>
     <string name="send_to_jarvis">Send</string>
     <string name="sample">Sample</string>
     <string name="status_waiting">Waiting for Jarvis.</string>
@@ -18,4 +19,14 @@
     <string name="contacting_jarvis">Contacting Jarvis.</string>
     <string name="server_error">Server error: %1$s</string>
     <string name="app_not_found">I could not find %1$s on this phone.</string>
+    <string name="call_permissions_needed">Allow contacts and phone permissions, then send the command again.</string>
+    <string name="contact_not_found">I could not find contact %1$s.</string>
+    <string name="phone_number_not_found">I could not find a phone number for %1$s.</string>
+    <string name="speech_recognition_unavailable">Speech recognition is not available on this phone.</string>
+    <string name="audio_permission_needed">Allow microphone permission, then tap Mic again.</string>
+    <string name="listening">Listening.</string>
+    <string name="hearing_you">I am hearing you.</string>
+    <string name="processing_voice">Processing your voice.</string>
+    <string name="speech_error">Speech error: %1$d</string>
+    <string name="no_speech_match">I could not hear a clear command.</string>
 </resources>
