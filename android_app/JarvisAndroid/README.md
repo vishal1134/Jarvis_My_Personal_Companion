@@ -23,6 +23,18 @@ Jarvis = male voice
 Friday = female voice
 ```
 
+## Current Actions
+
+The app now attempts to open installed apps for commands like:
+
+```text
+Jarvis open whatsapp
+Jarvis open calculator
+```
+
+Notification reading is planned next. It requires Android Notification Listener
+access, which must be enabled manually in phone settings.
+
 ## Setup
 
 1. Install Android Studio.

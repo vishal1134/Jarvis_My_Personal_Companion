@@ -32,6 +32,7 @@ public class MainActivity extends Activity {
     private TextToSpeech textToSpeech;
     private final List<Voice> availableVoices = new ArrayList<>();
     private final JarvisServerClient serverClient = new JarvisServerClient();
+    private AppLauncher appLauncher;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
@@ -43,6 +44,7 @@ public class MainActivity extends Activity {
         commandInput = findViewById(R.id.commandInput);
         statusText = findViewById(R.id.statusText);
         voiceSpinner = findViewById(R.id.voiceSpinner);
+        appLauncher = new AppLauncher(this);
         Button speakButton = findViewById(R.id.speakButton);
         Button sampleButton = findViewById(R.id.sampleButton);
 
@@ -164,14 +166,25 @@ public class MainActivity extends Activity {
         statusText.setText(R.string.contacting_jarvis);
         executor.execute(() -> {
             try {
-                String spokenResponse = serverClient.handleCommand(serverUrl, command);
-                runOnUiThread(() -> speakResponse(spokenResponse));
+                JarvisResult result = serverClient.handleCommand(serverUrl, command);
+                runOnUiThread(() -> handleJarvisResult(result));
             } catch (Exception exception) {
                 runOnUiThread(() -> statusText.setText(
                         getString(R.string.server_error, exception.getMessage())
                 ));
             }
         });
+    }
+
+    private void handleJarvisResult(JarvisResult result) {
+        speakResponse(result.getSpokenResponse());
+
+        if ("open_app".equals(result.getIntent())) {
+            boolean opened = appLauncher.openApp(result.getTarget());
+            if (!opened) {
+                statusText.setText(getString(R.string.app_not_found, result.getTarget()));
+            }
+        }
     }
 
     private void speakResponse(String spokenResponse) {

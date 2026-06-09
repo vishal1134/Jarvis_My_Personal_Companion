@@ -28,6 +28,8 @@ Jarvis open whatsapp
 open whatsapp
 whatsapp open pannu
 whatsapp thirakku
+Jarvis open calculator
+calculator open pannu
 ```
 
 Current output:
@@ -38,7 +40,8 @@ whatsapp open pannuren, sir.
 ```
 
 The Android app only speaks the response for now. It does not open the real app
-yet.
+yet on older builds. The current Android MVP now attempts to open the matching
+installed app.
 
 ## Response Language
 
@@ -63,4 +66,3 @@ Anything outside these patterns returns:
 ```text
 I did not understand that yet, sir.
 ```
-

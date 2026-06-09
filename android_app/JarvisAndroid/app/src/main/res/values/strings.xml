@@ -17,4 +17,5 @@
     <string name="enter_command">Enter a command.</string>
     <string name="contacting_jarvis">Contacting Jarvis.</string>
     <string name="server_error">Server error: %1$s</string>
+    <string name="app_not_found">I could not find %1$s on this phone.</string>
 </resources>

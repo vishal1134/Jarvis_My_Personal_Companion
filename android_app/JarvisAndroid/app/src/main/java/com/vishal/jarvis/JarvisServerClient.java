@@ -11,7 +11,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class JarvisServerClient {
-    public String handleCommand(String serverUrl, String commandText) throws Exception {
+    public JarvisResult handleCommand(String serverUrl, String commandText) throws Exception {
         String cleanServerUrl = trimTrailingSlash(serverUrl);
         URL url = new URL(cleanServerUrl + "/commands/handle");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -48,7 +48,12 @@ public class JarvisServerClient {
         }
 
         JSONObject response = new JSONObject(responseBody.toString());
-        return response.getString("spoken_response");
+        JSONObject command = response.getJSONObject("command");
+        return new JarvisResult(
+                command.getString("intent"),
+                command.optString("target", null),
+                response.getString("spoken_response")
+        );
     }
 
     private String trimTrailingSlash(String value) {
@@ -58,4 +63,3 @@ public class JarvisServerClient {
         return value;
     }
 }
-

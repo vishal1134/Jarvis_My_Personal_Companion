@@ -24,6 +24,12 @@ class RuleParserTest(unittest.TestCase):
         self.assertEqual(command.intent, "open_app")
         self.assertEqual(command.target, "whatsapp")
 
+    def test_open_calculator(self):
+        command = parse_command("Jarvis open calculator")
+
+        self.assertEqual(command.intent, "open_app")
+        self.assertEqual(command.target, "calculator")
+
     def test_set_response_language(self):
         command = parse_command("reply in tamil")
 
@@ -37,4 +43,3 @@ class RuleParserTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
