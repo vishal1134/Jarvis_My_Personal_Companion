@@ -51,3 +51,17 @@ On Windows, after the server is running, Jarvis can speak a response aloud:
 
 This is an early laptop voice preview. The Android app will later speak the same
 `spoken_response` using Android Text-to-Speech.
+
+## Recognized Words
+
+The current rule-based command words are listed in:
+
+```text
+docs/recognized_words.md
+```
+
+The server also exposes them at:
+
+```text
+GET /commands/catalog
+```

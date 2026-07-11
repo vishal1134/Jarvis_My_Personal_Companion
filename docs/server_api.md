@@ -83,6 +83,15 @@ Response:
 }
 ```
 
+## Command Catalog
+
+```text
+GET /commands/catalog
+```
+
+Returns the current command intents, trigger words, and examples Jarvis can
+recognize.
+
 ## Read Memory
 
 ```text
@@ -107,4 +116,3 @@ Request:
   "preferred_response_language": "auto"
 }
 ```
-

@@ -8,6 +8,7 @@ except ImportError:  # Allows local parser tests before dependencies are install
     BaseModel = object
 
 from server.brain.rule_parser import parse_command
+from server.brain.command_catalog import command_catalog
 from server.brain.session import handle_text
 from server.memory.store import MemoryStore
 
@@ -38,6 +39,10 @@ if FastAPI:
     @app.post("/commands/handle")
     def handle(request: HandleRequest) -> dict[str, object]:
         return handle_text(request.text)
+
+    @app.get("/commands/catalog")
+    def catalog() -> dict[str, object]:
+        return command_catalog()
 
     @app.get("/memory")
     def read_memory() -> dict[str, object]:
