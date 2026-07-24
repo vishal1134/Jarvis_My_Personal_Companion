@@ -67,14 +67,20 @@ public class AppLauncher {
         packageAliases.put("youtube", "com.google.android.youtube");
         packageAliases.put("chrome", "com.android.chrome");
         packageAliases.put("google chrome", "com.android.chrome");
+        packageAliases.put("google", "com.google.android.googlequicksearchbox");
+        packageAliases.put("gmail", "com.google.android.gm");
+        packageAliases.put("mail", "com.google.android.gm");
         packageAliases.put("instagram", "com.instagram.android");
         packageAliases.put("camera", "com.android.camera");
         packageAliases.put("calculator", "com.google.android.calculator");
         packageAliases.put("calc", "com.google.android.calculator");
+        packageAliases.put("maps", "com.google.android.apps.maps");
+        packageAliases.put("google maps", "com.google.android.apps.maps");
+        packageAliases.put("photos", "com.google.android.apps.photos");
+        packageAliases.put("play store", "com.android.vending");
     }
 
     private String normalize(String value) {
         return value.toLowerCase(Locale.US).trim().replaceAll("\\s+", " ");
     }
 }
-

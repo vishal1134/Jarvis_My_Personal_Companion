@@ -53,6 +53,8 @@ public class MainActivity extends Activity {
     private ContactCaller contactCaller;
     private NotificationReader notificationReader;
     private YouTubeSearcher youTubeSearcher;
+    private WebSearcher webSearcher;
+    private CalculatorEngine calculatorEngine;
     private SystemSettingsOpener systemSettingsOpener;
     private FlashlightController flashlightController;
     private WifiController wifiController;
@@ -85,6 +87,8 @@ public class MainActivity extends Activity {
         contactCaller = new ContactCaller(this);
         notificationReader = new NotificationReader(this);
         youTubeSearcher = new YouTubeSearcher(this);
+        webSearcher = new WebSearcher(this);
+        calculatorEngine = new CalculatorEngine();
         systemSettingsOpener = new SystemSettingsOpener(this);
         flashlightController = new FlashlightController(this);
         wifiController = new WifiController(this);
@@ -596,6 +600,24 @@ public class MainActivity extends Activity {
             return;
         }
 
+        if ("search_web".equals(result.getIntent())) {
+            boolean opened = webSearcher.search(result.getTarget());
+            if (!opened) {
+                statusText.setText(R.string.web_search_failed);
+            }
+            return;
+        }
+
+        if ("search_in_app".equals(result.getIntent())) {
+            handleSearchInApp(result.getTarget());
+            return;
+        }
+
+        if ("calculate_expression".equals(result.getIntent())) {
+            handleCalculation(result.getTarget());
+            return;
+        }
+
         if ("open_system_settings".equals(result.getIntent())) {
             systemSettingsOpener.open(result.getTarget());
             return;
@@ -709,6 +731,45 @@ public class MainActivity extends Activity {
         if (!performed) {
             statusText.setText(R.string.screen_action_failed);
         }
+    }
+
+    private void handleSearchInApp(String target) {
+        String[] pieces = target == null ? new String[0] : target.split("::", 2);
+        if (pieces.length < 2) {
+            statusText.setText(R.string.screen_action_failed);
+            return;
+        }
+
+        boolean opened = appLauncher.openApp(pieces[0]);
+        if (!opened) {
+            statusText.setText(getString(R.string.app_not_found, pieces[0]));
+            return;
+        }
+
+        if (!JarvisAccessibilityService.isRunning()) {
+            statusText.setText(R.string.accessibility_needed);
+            return;
+        }
+
+        String query = pieces[1];
+        mainHandler.postDelayed(() -> JarvisAccessibilityService.tapVisibleText("search"), 1400);
+        mainHandler.postDelayed(() -> JarvisAccessibilityService.tapVisibleText("search or type"), 1900);
+        mainHandler.postDelayed(() -> {
+            boolean typed = JarvisAccessibilityService.typeIntoFocusedField(query);
+            if (!typed) {
+                statusText.setText(R.string.screen_action_failed);
+            }
+        }, 2400);
+    }
+
+    private void handleCalculation(String expression) {
+        String answer = calculatorEngine.calculate(expression);
+        if (answer == null) {
+            speakResponse(getString(R.string.calculation_failed));
+            return;
+        }
+
+        speakResponse(getString(R.string.calculation_answer, answer));
     }
 
     private void handleConnectWifi(JarvisResult result) {

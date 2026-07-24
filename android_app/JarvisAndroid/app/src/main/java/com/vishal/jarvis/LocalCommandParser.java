@@ -80,6 +80,28 @@ public class LocalCommandParser {
                     : "Searching YouTube for " + youtubeQuery + ", sir.");
         }
 
+        String calculation = extractCalculation(text);
+        if (calculation != null) {
+            return result("calculate_expression", calculation, tanglish
+                    ? calculation + " calculate pannuren, sir."
+                    : "Calculating " + calculation + ", sir.");
+        }
+
+        String webQuery = extractWebSearchQuery(text);
+        if (webQuery != null) {
+            return result("search_web", webQuery, tanglish
+                    ? "Google la " + webQuery + " search pannuren, sir."
+                    : "Searching Google for " + webQuery + ", sir.");
+        }
+
+        String appSearch = extractAppSearch(text);
+        if (appSearch != null) {
+            String[] pieces = appSearch.split("::", 2);
+            return result("search_in_app", appSearch, tanglish
+                    ? pieces[0] + " la " + pieces[1] + " search pannuren, sir."
+                    : "Searching " + pieces[0] + " for " + pieces[1] + ", sir.");
+        }
+
         String notificationApp = extractNotificationApp(text);
         if (notificationApp != null) {
             return result("query_notifications", notificationApp, tanglish
@@ -267,6 +289,58 @@ public class LocalCommandParser {
         }
         if (cleaned.startsWith("youtube la ") && cleaned.contains(" thedu")) {
             return cleaned.substring("youtube la ".length(), cleaned.indexOf(" thedu")).trim();
+        }
+        return null;
+    }
+
+    private String extractCalculation(String text) {
+        String cleaned = text.replace("calculator la ", "")
+                .replace("calculator", "")
+                .replace("calculate pannu", "calculate")
+                .trim();
+        if (cleaned.startsWith("calculate ")) {
+            return cleaned.substring("calculate ".length()).trim();
+        }
+        if (cleaned.endsWith(" calculate")) {
+            return cleaned.substring(0, cleaned.indexOf(" calculate")).trim();
+        }
+        if (cleaned.contains(" plus ") || cleaned.contains(" minus ")
+                || cleaned.contains(" into ") || cleaned.contains(" divided by ")
+                || cleaned.matches(".*\\d\\s*[+\\-*/x]\\s*\\d.*")) {
+            return cleaned;
+        }
+        return null;
+    }
+
+    private String extractWebSearchQuery(String text) {
+        if (text.startsWith("google search ")) {
+            return text.substring("google search ".length()).trim();
+        }
+        if (text.startsWith("search ") && containsAny(text, " in google", " on google")) {
+            int end = text.contains(" in google") ? text.indexOf(" in google") : text.indexOf(" on google");
+            return text.substring("search ".length(), end).trim();
+        }
+        if (text.startsWith("google la ") && text.contains(" search")) {
+            return text.substring("google la ".length(), text.indexOf(" search")).trim();
+        }
+        if (text.startsWith("google la ") && text.contains(" thedu")) {
+            return text.substring("google la ".length(), text.indexOf(" thedu")).trim();
+        }
+        return null;
+    }
+
+    private String extractAppSearch(String text) {
+        String[] apps = {"instagram", "gmail", "mail", "chrome", "google", "play store", "maps", "photos", "telegram"};
+        for (String app : apps) {
+            String prefix = app + " la ";
+            if (text.startsWith(prefix) && text.contains(" search")) {
+                String query = text.substring(prefix.length(), text.indexOf(" search")).trim();
+                return query.isEmpty() ? null : app + "::" + query;
+            }
+            if (text.startsWith("search ") && text.contains(" in " + app)) {
+                String query = text.substring("search ".length(), text.indexOf(" in " + app)).trim();
+                return query.isEmpty() ? null : app + "::" + query;
+            }
         }
         return null;
     }
