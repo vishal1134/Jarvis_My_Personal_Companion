@@ -24,7 +24,8 @@ public class LocalCommandParser {
         String text = removeWakeName(source);
         boolean tanglish = isTanglish(source);
 
-        if (text.isEmpty() || containsAny(text, "wake up", "irukiya", "irukingala", "status", "ready ah")) {
+        if (text.isEmpty() || containsAny(text, "wake up", "you up", "boot up", "turn on",
+                "you there", "irukiya", "irukiyaa", "irukingala", "on aagu", "status", "ready ah")) {
             return result("wake_assistant", null, tanglish
                     ? "Naan inga irukken, sir. Unga command ku ready."
                     : "At your command, sir.");
@@ -116,6 +117,11 @@ public class LocalCommandParser {
         String setting = extractSetting(text);
         if (setting != null) {
             return result("open_system_settings", setting, setting + " settings open pannuren, sir.");
+        }
+
+        String phoneAction = extractPhoneAction(text);
+        if (phoneAction != null) {
+            return result("phone_action", phoneAction, phoneActionResponse(phoneAction, tanglish));
         }
 
         String flashlightState = extractFlashlightState(text);
@@ -360,6 +366,47 @@ public class LocalCommandParser {
         return null;
     }
 
+    private String extractPhoneAction(String text) {
+        if (containsAny(text, "go back", "back pannu", "pinadi po", "previous screen")) {
+            return "back";
+        }
+        if (containsAny(text, "go home", "home pannu", "home screen")) {
+            return "home";
+        }
+        if (containsAny(text, "recent apps", "recents", "recent open pannu")) {
+            return "recents";
+        }
+        if (containsAny(text, "open notifications", "notification panel", "notifications open pannu")) {
+            return "notifications";
+        }
+        if (containsAny(text, "scroll down", "keela po", "down pannu")) {
+            return "scroll_down";
+        }
+        if (containsAny(text, "scroll up", "mela po", "up pannu")) {
+            return "scroll_up";
+        }
+        return null;
+    }
+
+    private String phoneActionResponse(String action, boolean tanglish) {
+        if ("back".equals(action)) {
+            return tanglish ? "Back poguren, sir." : "Going back, sir.";
+        }
+        if ("home".equals(action)) {
+            return tanglish ? "Home screen ku poguren, sir." : "Going home, sir.";
+        }
+        if ("recents".equals(action)) {
+            return tanglish ? "Recent apps open pannuren, sir." : "Opening recent apps, sir.";
+        }
+        if ("notifications".equals(action)) {
+            return tanglish ? "Notification panel open pannuren, sir." : "Opening notifications, sir.";
+        }
+        if ("scroll_down".equals(action)) {
+            return tanglish ? "Keela scroll pannuren, sir." : "Scrolling down, sir.";
+        }
+        return tanglish ? "Mela scroll pannuren, sir." : "Scrolling up, sir.";
+    }
+
     private String extractFlashlightState(String text) {
         if (!containsAny(text, "torch", "flashlight", "light")) {
             return null;
@@ -401,4 +448,3 @@ public class LocalCommandParser {
         return null;
     }
 }
-

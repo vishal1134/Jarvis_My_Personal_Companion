@@ -3,5 +3,7 @@
     <color name="background">#F7F8FA</color>
     <color name="text_primary">#1E252B</color>
     <color name="text_secondary">#5D6872</color>
+    <color name="panel">#FFFFFF</color>
+    <color name="accent">#1E6B5C</color>
+    <color name="line">#D7DCE1</color>
 </resources>
-

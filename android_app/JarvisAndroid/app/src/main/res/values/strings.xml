@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Jarvis</string>
-    <string name="subtitle">Voice response bridge for your local Jarvis server.</string>
+    <string name="subtitle">Phone-first voice assistant for local actions.</string>
     <string name="server_url_hint">Server URL</string>
     <string name="default_server_url">http://192.168.1.10:8000</string>
     <string name="command_hint">Command</string>
@@ -36,4 +36,16 @@
     <string name="flashlight_unavailable">Flashlight is not available on this phone.</string>
     <string name="wifi_manual_connection_needed">Wi-Fi settings opened. Complete the connection there.</string>
     <string name="jarvis_sleeping">Jarvis is quiet. Call Jarvis to wake him.</string>
+    <string name="listening_control">Always listen for Jarvis</string>
+    <string name="listening_control_hint">When enabled, Jarvis keeps listening and responds only after his name.</string>
+    <string name="jarvis_hearing_off">Jarvis hearing is off.</string>
+    <string name="jarvis_waiting_for_name">Jarvis is waiting for his name.</string>
+    <string name="jarvis_listening_for_wake">Listening for Jarvis.</string>
+    <string name="jarvis_ignored_without_name">Ignored. Call Jarvis first, sir.</string>
+    <string name="permission_state">Mic: %1$s   Notifications: %2$s   Accessibility: %3$s</string>
+    <string name="accessibility_button">Phone control permission</string>
+    <string name="accessibility_needed">Enable Jarvis phone control permission, sir.</string>
+    <string name="phone_action_failed">I could not perform that phone action, sir.</string>
+    <string name="accessibility_service_label">Jarvis phone control</string>
+    <string name="accessibility_service_description">Allows Jarvis to perform personal phone actions like back, home, notifications, and scrolling when you ask.</string>
 </resources>

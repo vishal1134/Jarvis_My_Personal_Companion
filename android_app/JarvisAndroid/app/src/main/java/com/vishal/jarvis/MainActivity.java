@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -17,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -37,7 +40,10 @@ public class MainActivity extends Activity {
     private EditText serverUrlInput;
     private EditText commandInput;
     private TextView statusText;
+    private TextView listeningStateText;
+    private TextView permissionStateText;
     private Spinner voiceSpinner;
+    private Switch listeningSwitch;
     private TextToSpeech textToSpeech;
     private SpeechRecognizer speechRecognizer;
     private Intent speechRecognizerIntent;
@@ -54,6 +60,9 @@ public class MainActivity extends Activity {
     private LocalCommandParser localCommandParser;
     private String lastSpokenResponse = "";
     private boolean assistantAwake = true;
+    private boolean continuousListeningEnabled = false;
+    private boolean listeningSessionActive = false;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
@@ -64,7 +73,10 @@ public class MainActivity extends Activity {
         serverUrlInput = findViewById(R.id.serverUrlInput);
         commandInput = findViewById(R.id.commandInput);
         statusText = findViewById(R.id.statusText);
+        listeningStateText = findViewById(R.id.listeningStateText);
+        permissionStateText = findViewById(R.id.permissionStateText);
         voiceSpinner = findViewById(R.id.voiceSpinner);
+        listeningSwitch = findViewById(R.id.listeningSwitch);
         appLauncher = new AppLauncher(this);
         contactCaller = new ContactCaller(this);
         notificationReader = new NotificationReader(this);
@@ -77,6 +89,7 @@ public class MainActivity extends Activity {
         Button speakButton = findViewById(R.id.speakButton);
         Button sampleButton = findViewById(R.id.sampleButton);
         Button micButton = findViewById(R.id.micButton);
+        Button accessibilityButton = findViewById(R.id.accessibilityButton);
 
         textToSpeech = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
@@ -93,8 +106,11 @@ public class MainActivity extends Activity {
         sampleButton.setOnClickListener(view -> commandInput.setText(R.string.sample_command));
         speakButton.setOnClickListener(this::sendCommand);
         micButton.setOnClickListener(view -> startVoiceCommand());
+        accessibilityButton.setOnClickListener(view -> systemSettingsOpener.open("accessibility"));
+        listeningSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> setContinuousListeningEnabled(isChecked));
 
         setupSpeechRecognizer();
+        updateAssistantStatus();
     }
 
     private void setupSpeechRecognizer() {
@@ -116,7 +132,9 @@ public class MainActivity extends Activity {
         speechRecognizer.setRecognitionListener(new RecognitionListener() {
             @Override
             public void onReadyForSpeech(Bundle params) {
+                listeningSessionActive = true;
                 statusText.setText(R.string.listening);
+                updateAssistantStatus();
             }
 
             @Override
@@ -139,20 +157,25 @@ public class MainActivity extends Activity {
 
             @Override
             public void onError(int error) {
+                listeningSessionActive = false;
                 statusText.setText(getString(R.string.speech_error, error));
+                scheduleListeningRestart();
             }
 
             @Override
             public void onResults(Bundle results) {
+                listeningSessionActive = false;
                 ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 if (matches == null || matches.isEmpty()) {
                     statusText.setText(R.string.no_speech_match);
+                    scheduleListeningRestart();
                     return;
                 }
 
                 String recognizedText = matches.get(0);
                 commandInput.setText(recognizedText);
                 sendCommand(null);
+                scheduleListeningRestart();
             }
 
             @Override
@@ -174,10 +197,71 @@ public class MainActivity extends Activity {
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, AUDIO_PERMISSION_REQUEST);
             statusText.setText(R.string.audio_permission_needed);
+            if (listeningSwitch != null) {
+                listeningSwitch.setChecked(false);
+            }
             return;
         }
 
+        listeningSessionActive = true;
         speechRecognizer.startListening(speechRecognizerIntent);
+        updateAssistantStatus();
+    }
+
+    private void setContinuousListeningEnabled(boolean enabled) {
+        continuousListeningEnabled = enabled;
+        if (!enabled) {
+            listeningSessionActive = false;
+            if (speechRecognizer != null) {
+                speechRecognizer.cancel();
+            }
+            statusText.setText(R.string.jarvis_hearing_off);
+            updateAssistantStatus();
+            return;
+        }
+
+        assistantAwake = true;
+        statusText.setText(R.string.jarvis_waiting_for_name);
+        updateAssistantStatus();
+        startVoiceCommand();
+    }
+
+    private void scheduleListeningRestart() {
+        if (!continuousListeningEnabled) {
+            updateAssistantStatus();
+            return;
+        }
+
+        mainHandler.removeCallbacksAndMessages(null);
+        mainHandler.postDelayed(() -> {
+            if (continuousListeningEnabled && !listeningSessionActive) {
+                startVoiceCommand();
+            }
+        }, 1200);
+    }
+
+    private void updateAssistantStatus() {
+        if (listeningStateText == null || permissionStateText == null) {
+            return;
+        }
+
+        if (!continuousListeningEnabled) {
+            listeningStateText.setText(R.string.jarvis_hearing_off);
+        } else if (listeningSessionActive) {
+            listeningStateText.setText(R.string.jarvis_listening_for_wake);
+        } else {
+            listeningStateText.setText(R.string.jarvis_waiting_for_name);
+        }
+
+        boolean micReady = checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+        boolean notificationReady = notificationReader != null && notificationReader.hasNotificationAccess();
+        boolean accessibilityReady = JarvisAccessibilityService.isRunning();
+        permissionStateText.setText(getString(
+                R.string.permission_state,
+                micReady ? "OK" : "Needed",
+                notificationReady ? "OK" : "Needed",
+                accessibilityReady ? "OK" : "Needed"
+        ));
     }
 
     private void populateVoiceSpinner() {
@@ -274,6 +358,11 @@ public class MainActivity extends Activity {
             return;
         }
 
+        if (continuousListeningEnabled && !usesWakeName(command)) {
+            statusText.setText(R.string.jarvis_ignored_without_name);
+            return;
+        }
+
         if (!assistantAwake && !usesWakeName(command)) {
             statusText.setText(R.string.jarvis_sleeping);
             return;
@@ -343,6 +432,12 @@ public class MainActivity extends Activity {
 
         if ("sleep_assistant".equals(result.getIntent())) {
             assistantAwake = false;
+            if (continuousListeningEnabled) {
+                setContinuousListeningEnabled(false);
+                if (listeningSwitch != null) {
+                    listeningSwitch.setChecked(false);
+                }
+            }
             return;
         }
 
@@ -379,6 +474,11 @@ public class MainActivity extends Activity {
 
         if ("open_system_settings".equals(result.getIntent())) {
             systemSettingsOpener.open(result.getTarget());
+            return;
+        }
+
+        if ("phone_action".equals(result.getIntent())) {
+            handlePhoneAction(result.getTarget());
             return;
         }
 
@@ -451,6 +551,19 @@ public class MainActivity extends Activity {
         speakResponse(notificationReader.summarizeNotificationsForApp(appName, "sir"));
     }
 
+    private void handlePhoneAction(String action) {
+        if (!JarvisAccessibilityService.isRunning()) {
+            statusText.setText(R.string.accessibility_needed);
+            systemSettingsOpener.open("accessibility");
+            return;
+        }
+
+        boolean performed = JarvisAccessibilityService.performPhoneAction(action);
+        if (!performed) {
+            statusText.setText(R.string.phone_action_failed);
+        }
+    }
+
     private void handleConnectWifi(JarvisResult result) {
         if (result.getWifiPassword() == null || result.getWifiPassword().isEmpty()) {
             wifiController.openWifiSettings();
@@ -507,6 +620,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        mainHandler.removeCallbacksAndMessages(null);
         executor.shutdownNow();
         if (textToSpeech != null) {
             textToSpeech.stop();
