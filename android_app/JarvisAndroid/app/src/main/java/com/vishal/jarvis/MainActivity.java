@@ -3,7 +3,6 @@ package com.vishal.jarvis;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,8 +30,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MainActivity extends Activity {
-    private static final String PREFS_NAME = "jarvis_settings";
-    private static final String KEY_VOICE_NAME = "jarvis_voice_name";
     private static final int CALL_PERMISSION_REQUEST = 1001;
     private static final int AUDIO_PERMISSION_REQUEST = 1002;
     private static final int CAMERA_PERMISSION_REQUEST = 1003;
@@ -42,8 +39,11 @@ public class MainActivity extends Activity {
     private TextView statusText;
     private TextView listeningStateText;
     private TextView permissionStateText;
+    private TextView activeVoiceText;
     private Spinner voiceSpinner;
+    private Spinner assistantNameSpinner;
     private Switch listeningSwitch;
+    private EditText assistantNameInput;
     private TextToSpeech textToSpeech;
     private SpeechRecognizer speechRecognizer;
     private Intent speechRecognizerIntent;
@@ -57,6 +57,7 @@ public class MainActivity extends Activity {
     private FlashlightController flashlightController;
     private WifiController wifiController;
     private BluetoothController bluetoothController;
+    private AssistantIdentityStore identityStore;
     private LocalCommandParser localCommandParser;
     private String lastSpokenResponse = "";
     private boolean assistantAwake = true;
@@ -75,8 +76,11 @@ public class MainActivity extends Activity {
         statusText = findViewById(R.id.statusText);
         listeningStateText = findViewById(R.id.listeningStateText);
         permissionStateText = findViewById(R.id.permissionStateText);
+        activeVoiceText = findViewById(R.id.activeVoiceText);
         voiceSpinner = findViewById(R.id.voiceSpinner);
+        assistantNameSpinner = findViewById(R.id.assistantNameSpinner);
         listeningSwitch = findViewById(R.id.listeningSwitch);
+        assistantNameInput = findViewById(R.id.assistantNameInput);
         appLauncher = new AppLauncher(this);
         contactCaller = new ContactCaller(this);
         notificationReader = new NotificationReader(this);
@@ -85,11 +89,14 @@ public class MainActivity extends Activity {
         flashlightController = new FlashlightController(this);
         wifiController = new WifiController(this);
         bluetoothController = new BluetoothController(this);
+        identityStore = new AssistantIdentityStore(this);
         localCommandParser = new LocalCommandParser();
         Button speakButton = findViewById(R.id.speakButton);
         Button sampleButton = findViewById(R.id.sampleButton);
         Button micButton = findViewById(R.id.micButton);
         Button accessibilityButton = findViewById(R.id.accessibilityButton);
+        Button addAssistantNameButton = findViewById(R.id.addAssistantNameButton);
+        Button saveAssistantVoiceButton = findViewById(R.id.saveAssistantVoiceButton);
 
         textToSpeech = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
@@ -97,6 +104,7 @@ public class MainActivity extends Activity {
                 textToSpeech.setSpeechRate(0.92f);
                 textToSpeech.setPitch(0.9f);
                 populateVoiceSpinner();
+                populateAssistantNameSpinner();
                 statusText.setText(R.string.tts_ready);
             } else {
                 statusText.setText(R.string.tts_failed);
@@ -107,6 +115,8 @@ public class MainActivity extends Activity {
         speakButton.setOnClickListener(this::sendCommand);
         micButton.setOnClickListener(view -> startVoiceCommand());
         accessibilityButton.setOnClickListener(view -> systemSettingsOpener.open("accessibility"));
+        addAssistantNameButton.setOnClickListener(view -> addAssistantName());
+        saveAssistantVoiceButton.setOnClickListener(view -> saveVoiceForActiveName());
         listeningSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> setContinuousListeningEnabled(isChecked));
 
         setupSpeechRecognizer();
@@ -241,7 +251,7 @@ public class MainActivity extends Activity {
     }
 
     private void updateAssistantStatus() {
-        if (listeningStateText == null || permissionStateText == null) {
+        if (listeningStateText == null || permissionStateText == null || identityStore == null) {
             return;
         }
 
@@ -258,10 +268,12 @@ public class MainActivity extends Activity {
         boolean accessibilityReady = JarvisAccessibilityService.isRunning();
         permissionStateText.setText(getString(
                 R.string.permission_state,
+                identityStore.getActiveName(),
                 micReady ? "OK" : "Needed",
                 notificationReady ? "OK" : "Needed",
                 accessibilityReady ? "OK" : "Needed"
         ));
+        updateActiveVoiceText();
     }
 
     private void populateVoiceSpinner() {
@@ -292,13 +304,16 @@ public class MainActivity extends Activity {
                 voiceNames
         );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        voiceSpinner.setOnItemSelectedListener(null);
         voiceSpinner.setAdapter(adapter);
 
-        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        String savedVoiceName = preferences.getString(KEY_VOICE_NAME, null);
+        String savedVoiceName = identityStore.getVoiceForName(identityStore.getActiveName());
         int selectedIndex = findVoiceIndex(savedVoiceName);
         if (selectedIndex < 0) {
             selectedIndex = findLikelyJarvisVoiceIndex();
+            if (selectedIndex >= 0) {
+                identityStore.setVoiceForName(identityStore.getActiveName(), availableVoices.get(selectedIndex).getName());
+            }
         }
         if (selectedIndex >= 0) {
             voiceSpinner.setSelection(selectedIndex);
@@ -314,16 +329,14 @@ public class MainActivity extends Activity {
 
                 Voice selectedVoice = availableVoices.get(position);
                 textToSpeech.setVoice(selectedVoice);
-                getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                        .edit()
-                        .putString(KEY_VOICE_NAME, selectedVoice.getName())
-                        .apply();
+                updateActiveVoiceText();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+        updateActiveVoiceText();
     }
 
     private int findVoiceIndex(String voiceName) {
@@ -337,6 +350,112 @@ public class MainActivity extends Activity {
             }
         }
         return -1;
+    }
+
+    private void populateAssistantNameSpinner() {
+        List<String> names = identityStore.getNames();
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                names
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        assistantNameSpinner.setOnItemSelectedListener(null);
+        assistantNameSpinner.setAdapter(adapter);
+
+        int activeIndex = names.indexOf(identityStore.getActiveName());
+        if (activeIndex >= 0) {
+            assistantNameSpinner.setSelection(activeIndex);
+        }
+
+        assistantNameSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                List<String> currentNames = identityStore.getNames();
+                if (position < 0 || position >= currentNames.size()) {
+                    return;
+                }
+
+                identityStore.setActiveName(currentNames.get(position));
+                applyVoiceForActiveName();
+                updateAssistantStatus();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+    }
+
+    private void addAssistantName() {
+        String newName = assistantNameInput.getText().toString().trim();
+        if (newName.isEmpty()) {
+            statusText.setText(R.string.enter_assistant_name);
+            return;
+        }
+
+        identityStore.addName(newName, getSelectedVoiceName());
+        assistantNameInput.setText("");
+        populateAssistantNameSpinner();
+        applyVoiceForActiveName();
+        statusText.setText(getString(R.string.assistant_name_saved, newName));
+        updateAssistantStatus();
+    }
+
+    private void saveVoiceForActiveName() {
+        String selectedVoiceName = getSelectedVoiceName();
+        if (selectedVoiceName == null || selectedVoiceName.isEmpty()) {
+            statusText.setText(R.string.no_tts_voices);
+            return;
+        }
+
+        identityStore.setVoiceForName(identityStore.getActiveName(), selectedVoiceName);
+        statusText.setText(getString(R.string.assistant_voice_saved, identityStore.getActiveName()));
+        updateAssistantStatus();
+    }
+
+    private void applyVoiceForActiveName() {
+        if (textToSpeech == null || availableVoices.isEmpty()) {
+            return;
+        }
+
+        String voiceName = identityStore.getVoiceForName(identityStore.getActiveName());
+        int voiceIndex = findVoiceIndex(voiceName);
+        if (voiceIndex < 0) {
+            voiceIndex = findLikelyJarvisVoiceIndex();
+            if (voiceIndex >= 0) {
+                identityStore.setVoiceForName(identityStore.getActiveName(), availableVoices.get(voiceIndex).getName());
+            }
+        }
+        if (voiceIndex >= 0) {
+            voiceSpinner.setSelection(voiceIndex);
+            textToSpeech.setVoice(availableVoices.get(voiceIndex));
+        }
+        updateActiveVoiceText();
+    }
+
+    private String getSelectedVoiceName() {
+        int position = voiceSpinner.getSelectedItemPosition();
+        if (position >= 0 && position < availableVoices.size()) {
+            return availableVoices.get(position).getName();
+        }
+        return null;
+    }
+
+    private void updateActiveVoiceText() {
+        if (activeVoiceText == null || identityStore == null) {
+            return;
+        }
+
+        String savedVoice = identityStore.getVoiceForName(identityStore.getActiveName());
+        String selectedVoice = getSelectedVoiceName();
+        if (savedVoice == null || savedVoice.isEmpty()) {
+            activeVoiceText.setText(getString(R.string.active_voice_missing, identityStore.getActiveName()));
+        } else if (savedVoice.equals(selectedVoice)) {
+            activeVoiceText.setText(getString(R.string.active_voice_locked, identityStore.getActiveName(), savedVoice));
+        } else {
+            activeVoiceText.setText(getString(R.string.active_voice_unsaved, identityStore.getActiveName(), selectedVoice));
+        }
     }
 
     private int findLikelyJarvisVoiceIndex() {
@@ -368,7 +487,12 @@ public class MainActivity extends Activity {
             return;
         }
 
-        List<JarvisResult> localResults = localCommandParser.parse(command, lastSpokenResponse);
+        List<JarvisResult> localResults = localCommandParser.parse(
+                command,
+                lastSpokenResponse,
+                identityStore.getNames(),
+                identityStore.getActiveName()
+        );
         if (shouldHandleLocally(command, localResults)) {
             handleJarvisResults(localResults);
             return;
@@ -482,6 +606,11 @@ public class MainActivity extends Activity {
             return;
         }
 
+        if ("screen_action".equals(result.getIntent())) {
+            handleScreenAction(result.getTarget());
+            return;
+        }
+
         if ("set_wifi_state".equals(result.getIntent())) {
             wifiController.openWifiSettings();
             return;
@@ -564,6 +693,24 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void handleScreenAction(String action) {
+        if (!JarvisAccessibilityService.isRunning()) {
+            statusText.setText(R.string.accessibility_needed);
+            systemSettingsOpener.open("accessibility");
+            return;
+        }
+
+        boolean performed = false;
+        if (action.startsWith("tap:")) {
+            performed = JarvisAccessibilityService.tapVisibleText(action.substring("tap:".length()));
+        } else if (action.startsWith("type:")) {
+            performed = JarvisAccessibilityService.typeIntoFocusedField(action.substring("type:".length()));
+        }
+        if (!performed) {
+            statusText.setText(R.string.screen_action_failed);
+        }
+    }
+
     private void handleConnectWifi(JarvisResult result) {
         if (result.getWifiPassword() == null || result.getWifiPassword().isEmpty()) {
             wifiController.openWifiSettings();
@@ -613,9 +760,15 @@ public class MainActivity extends Activity {
 
     private boolean usesWakeName(String command) {
         String normalized = command == null ? "" : command.toLowerCase(Locale.US).trim();
-        return "jarvis".equals(normalized)
-                || normalized.startsWith("jarvis ")
-                || normalized.endsWith(" jarvis");
+        for (String name : identityStore.getNames()) {
+            String normalizedName = name.toLowerCase(Locale.US).trim();
+            if (normalized.equals(normalizedName)
+                    || normalized.startsWith(normalizedName + " ")
+                    || normalized.endsWith(" " + normalizedName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

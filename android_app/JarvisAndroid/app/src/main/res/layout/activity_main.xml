@@ -77,6 +77,67 @@
             android:layout_marginTop="10dp"
             android:text="@string/accessibility_button" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="@string/assistant_identity"
+            android:textColor="@color/text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/assistantNameSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/activeVoiceText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/active_voice_waiting"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/jarvis_voice"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp" />
+
+        <Spinner
+            android:id="@+id/voiceSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="4dp" />
+
+        <Button
+            android:id="@+id/saveAssistantVoiceButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/save_assistant_voice" />
+
+        <EditText
+            android:id="@+id/assistantNameInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="@string/new_assistant_name_hint"
+            android:inputType="textCapWords"
+            android:singleLine="true" />
+
+        <Button
+            android:id="@+id/addAssistantNameButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/add_assistant_name" />
+
         <EditText
             android:id="@+id/serverUrlInput"
             android:layout_width="match_parent"
@@ -96,20 +157,6 @@
             android:inputType="textCapSentences"
             android:minLines="2"
             android:text="@string/sample_command" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:text="@string/jarvis_voice"
-            android:textColor="@color/text_secondary"
-            android:textSize="14sp" />
-
-        <Spinner
-            android:id="@+id/voiceSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="4dp" />
 
         <LinearLayout
             android:layout_width="match_parent"

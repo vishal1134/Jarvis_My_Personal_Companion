@@ -8,10 +8,16 @@ import java.util.Locale;
 
 public class LocalCommandParser {
     public List<JarvisResult> parse(String text, String lastSpokenResponse) {
+        ArrayList<String> defaultNames = new ArrayList<>();
+        defaultNames.add("jarvis");
+        return parse(text, lastSpokenResponse, defaultNames, "jarvis");
+    }
+
+    public List<JarvisResult> parse(String text, String lastSpokenResponse, List<String> assistantNames, String activeName) {
         List<String> parts = splitMultiCommand(text);
         ArrayList<JarvisResult> results = new ArrayList<>();
         for (String part : parts) {
-            JarvisResult result = parseSingle(part, lastSpokenResponse);
+            JarvisResult result = parseSingle(part, lastSpokenResponse, assistantNames, activeName);
             if (result != null) {
                 results.add(result);
             }
@@ -19,13 +25,17 @@ public class LocalCommandParser {
         return results;
     }
 
-    private JarvisResult parseSingle(String rawText, String lastSpokenResponse) {
+    private JarvisResult parseSingle(String rawText, String lastSpokenResponse, List<String> assistantNames, String activeName) {
         String source = normalize(rawText);
-        String text = removeWakeName(source);
+        String calledName = findWakeName(source, assistantNames);
+        String text = removeWakeName(source, calledName);
         boolean tanglish = isTanglish(source);
 
         if (text.isEmpty() || containsAny(text, "wake up", "you up", "boot up", "turn on",
                 "you there", "irukiya", "irukiyaa", "irukingala", "on aagu", "status", "ready ah")) {
+            if (calledName != null && activeName != null && !calledName.equals(activeName)) {
+                return result("wake_assistant", null, "You selected " + activeName + " as my active name, sir. I will still respond.");
+            }
             return result("wake_assistant", null, tanglish
                     ? "Naan inga irukken, sir. Unga command ku ready."
                     : "At your command, sir.");
@@ -124,6 +134,11 @@ public class LocalCommandParser {
             return result("phone_action", phoneAction, phoneActionResponse(phoneAction, tanglish));
         }
 
+        String screenAction = extractScreenAction(text);
+        if (screenAction != null) {
+            return result("screen_action", screenAction, screenActionResponse(screenAction, tanglish));
+        }
+
         String flashlightState = extractFlashlightState(text);
         if (flashlightState != null) {
             return result("set_flashlight", flashlightState, tanglish
@@ -175,15 +190,31 @@ public class LocalCommandParser {
         return value == null ? "" : value.toLowerCase(Locale.US).trim().replaceAll("\\s+", " ");
     }
 
-    private String removeWakeName(String text) {
-        if ("jarvis".equals(text)) {
+    private String findWakeName(String text, List<String> assistantNames) {
+        for (String name : assistantNames) {
+            String normalizedName = normalize(name);
+            if (normalizedName.isEmpty()) {
+                continue;
+            }
+            if (text.equals(normalizedName) || text.startsWith(normalizedName + " ") || text.endsWith(" " + normalizedName)) {
+                return normalizedName;
+            }
+        }
+        return null;
+    }
+
+    private String removeWakeName(String text, String wakeName) {
+        if (wakeName == null || wakeName.isEmpty()) {
+            return text;
+        }
+        if (wakeName.equals(text)) {
             return "";
         }
-        if (text.startsWith("jarvis ")) {
-            return text.substring("jarvis ".length()).trim();
+        if (text.startsWith(wakeName + " ")) {
+            return text.substring((wakeName + " ").length()).trim();
         }
-        if (text.endsWith(" jarvis")) {
-            return text.substring(0, text.length() - " jarvis".length()).trim();
+        if (text.endsWith(" " + wakeName)) {
+            return text.substring(0, text.length() - (" " + wakeName).length()).trim();
         }
         return text;
     }
@@ -405,6 +436,43 @@ public class LocalCommandParser {
             return tanglish ? "Keela scroll pannuren, sir." : "Scrolling down, sir.";
         }
         return tanglish ? "Mela scroll pannuren, sir." : "Scrolling up, sir.";
+    }
+
+    private String extractScreenAction(String text) {
+        if (text.startsWith("tap ")) {
+            return "tap:" + text.substring("tap ".length()).trim();
+        }
+        if (text.startsWith("click ")) {
+            return "tap:" + text.substring("click ".length()).trim();
+        }
+        if (text.startsWith("press ")) {
+            return "tap:" + text.substring("press ".length()).trim();
+        }
+        if (text.contains(" tap pannu")) {
+            return "tap:" + text.substring(0, text.indexOf(" tap pannu")).trim();
+        }
+        if (text.contains(" click pannu")) {
+            return "tap:" + text.substring(0, text.indexOf(" click pannu")).trim();
+        }
+        if (text.startsWith("type ")) {
+            return "type:" + text.substring("type ".length()).trim();
+        }
+        if (text.startsWith("enter ")) {
+            return "type:" + text.substring("enter ".length()).trim();
+        }
+        if (text.contains(" type pannu")) {
+            return "type:" + text.substring(0, text.indexOf(" type pannu")).trim();
+        }
+        return null;
+    }
+
+    private String screenActionResponse(String action, boolean tanglish) {
+        if (action.startsWith("tap:")) {
+            String target = action.substring("tap:".length());
+            return tanglish ? target + " tap pannuren, sir." : "Tapping " + target + ", sir.";
+        }
+        String target = action.substring("type:".length());
+        return tanglish ? target + " type pannuren, sir." : "Typing " + target + ", sir.";
     }
 
     private String extractFlashlightState(String text) {

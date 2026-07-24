@@ -42,10 +42,22 @@
     <string name="jarvis_waiting_for_name">Jarvis is waiting for his name.</string>
     <string name="jarvis_listening_for_wake">Listening for Jarvis.</string>
     <string name="jarvis_ignored_without_name">Ignored. Call Jarvis first, sir.</string>
-    <string name="permission_state">Mic: %1$s   Notifications: %2$s   Accessibility: %3$s</string>
+    <string name="permission_state">Active: %1$s   Mic: %2$s   Notifications: %3$s   Accessibility: %4$s</string>
     <string name="accessibility_button">Phone control permission</string>
     <string name="accessibility_needed">Enable Jarvis phone control permission, sir.</string>
     <string name="phone_action_failed">I could not perform that phone action, sir.</string>
+    <string name="screen_action_failed">I could not find that visible control, sir.</string>
+    <string name="assistant_identity">Assistant identity</string>
+    <string name="new_assistant_name_hint">New assistant name</string>
+    <string name="add_assistant_name">Add name with selected voice</string>
+    <string name="save_assistant_voice">Save voice for selected name</string>
+    <string name="enter_assistant_name">Enter a name first, sir.</string>
+    <string name="assistant_name_saved">%1$s saved as an assistant name, sir.</string>
+    <string name="assistant_voice_saved">Voice saved for %1$s, sir.</string>
+    <string name="active_voice_waiting">Voice status will appear here.</string>
+    <string name="active_voice_missing">%1$s does not have a locked voice yet.</string>
+    <string name="active_voice_locked">%1$s voice locked: %2$s</string>
+    <string name="active_voice_unsaved">%1$s previewing unsaved voice: %2$s</string>
     <string name="accessibility_service_label">Jarvis phone control</string>
     <string name="accessibility_service_description">Allows Jarvis to perform personal phone actions like back, home, notifications, and scrolling when you ask.</string>
 </resources>
