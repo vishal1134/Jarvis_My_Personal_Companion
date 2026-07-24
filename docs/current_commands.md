@@ -49,6 +49,8 @@ installed app.
 Jarvis search vijay songs in youtube
 Jarvis youtube search tamil songs
 Jarvis youtube la tamil songs search pannu
+Jarvis youtube la munbe vaa search pannu
+Jarvis youtube la cooking video search
 ```
 
 Current Android behavior:
@@ -87,6 +89,8 @@ I did not understand that yet, sir.
 Jarvis read notifications
 notifications read pannu
 notifications padi
+whatsapp la yaaru enaku message pannirukaa Jarvis
+Jarvis whom have messaged me in whatsapp
 ```
 
 Current Android behavior:
@@ -100,6 +104,58 @@ Current privacy rule:
 
 ```text
 Jarvis reads counts and app names only, not private notification message text.
+```
+
+## Essential Local Commands
+
+```text
+Jarvis wake up
+Jarvis are you there
+Jarvis what can you do
+Jarvis repeat
+Jarvis stop
+Jarvis what time is it
+Jarvis today date
+time ena Jarvis
+Jarvis open settings
+Jarvis wifi settings
+wifi open pannu Jarvis
+Jarvis wifi on pannu
+turn on wifi Jarvis
+Jarvis wifi off pannu
+Jarvis connect to homewifi
+Jarvis homewifi connect pannu wifi password vandhu kowsalya at 05 k capital letter
+Jarvis bluetooth settings
+Jarvis bluetooth on pannu
+Jarvis bluetooth off pannu
+Jarvis sony headphones bluetooth connect pannu
+Jarvis connect to car bluetooth
+Jarvis turn on flashlight
+Jarvis torch on pannu
+torch off pannu Jarvis
+Jarvis torch off
+```
+
+Multiple commands:
+
+```text
+Jarvis time enna and torch on pannu
+Jarvis open calculator appuram bluetooth on pannu
+```
+
+Wi-Fi note:
+
+```text
+Android may ask for confirmation before adding or connecting to a Wi-Fi network.
+Jarvis stores provided Wi-Fi passwords in local server memory.
+```
+
+Android behavior:
+
+```text
+Stop speaking stops Android TTS.
+Settings commands open Android settings screens.
+Flashlight commands need camera permission once.
 ```
 
 ## Assistant Names

@@ -94,6 +94,67 @@ class SessionTest(unittest.TestCase):
         self.assertEqual(result["command"]["intent"], "open_app")
         self.assertEqual(result["command"]["slots"]["cache_hit"], "true")
 
+    def test_repeat_last_response(self):
+        now = datetime(2026, 6, 8, 8, 0, tzinfo=timezone.utc)
+
+        handle_text("Jarvis open whatsapp", store=self.store, now=now)
+        result = handle_text("Jarvis repeat", store=self.store, now=now)
+
+        self.assertEqual(result["command"]["intent"], "repeat_last_response")
+        self.assertEqual(result["spoken_response"], "Good morning, sir. Opening whatsapp, sir.")
+
+    def test_time_response_has_current_time(self):
+        result = handle_text(
+            "Jarvis what time is it",
+            store=self.store,
+            now=datetime(2026, 6, 8, 8, 5, tzinfo=timezone.utc),
+        )
+
+        self.assertIn("8:05 AM", result["spoken_response"])
+
+    def test_jarvis_alone_has_stronger_wake_response(self):
+        result = handle_text(
+            "Jarvis",
+            store=self.store,
+            now=datetime(2026, 6, 8, 8, 5, tzinfo=timezone.utc),
+        )
+
+        self.assertIn("At your command, sir.", result["spoken_response"])
+
+    def test_wifi_password_is_cached(self):
+        now = datetime(2026, 6, 8, 8, 0, tzinfo=timezone.utc)
+
+        handle_text(
+            "jarvis kowsalya connect pannu wifi password vandhu kowsalya at 05 k capital letter",
+            store=self.store,
+            now=now,
+        )
+
+        memory = self.store.load()
+        self.assertEqual(memory["wifi_credentials"]["kowsalya"]["password"], "Kowsalya@05")
+
+    def test_sleep_ignores_commands_until_wake_name(self):
+        now = datetime(2026, 6, 8, 8, 0, tzinfo=timezone.utc)
+
+        handle_text("jarvis turn off", store=self.store, now=now)
+        ignored = handle_text("time ena", store=self.store, now=now)
+        awakened = handle_text("jarvis", store=self.store, now=now)
+
+        self.assertEqual(ignored["command"]["intent"], "ignored_while_asleep")
+        self.assertFalse(ignored["should_speak"])
+        self.assertEqual(awakened["command"]["intent"], "wake_assistant")
+
+    def test_multi_command_returns_commands(self):
+        result = handle_text(
+            "Jarvis what time is it and torch on pannu",
+            store=self.store,
+            now=datetime(2026, 6, 8, 8, 5, tzinfo=timezone.utc),
+        )
+
+        self.assertEqual(len(result["commands"]), 2)
+        self.assertEqual(result["commands"][0]["intent"], "get_time")
+        self.assertEqual(result["commands"][1]["intent"], "set_flashlight")
+
 
 if __name__ == "__main__":
     unittest.main()

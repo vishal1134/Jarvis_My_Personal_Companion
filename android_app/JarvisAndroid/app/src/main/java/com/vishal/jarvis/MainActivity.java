@@ -32,6 +32,7 @@ public class MainActivity extends Activity {
     private static final String KEY_VOICE_NAME = "jarvis_voice_name";
     private static final int CALL_PERMISSION_REQUEST = 1001;
     private static final int AUDIO_PERMISSION_REQUEST = 1002;
+    private static final int CAMERA_PERMISSION_REQUEST = 1003;
 
     private EditText serverUrlInput;
     private EditText commandInput;
@@ -46,6 +47,10 @@ public class MainActivity extends Activity {
     private ContactCaller contactCaller;
     private NotificationReader notificationReader;
     private YouTubeSearcher youTubeSearcher;
+    private SystemSettingsOpener systemSettingsOpener;
+    private FlashlightController flashlightController;
+    private WifiController wifiController;
+    private BluetoothController bluetoothController;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
@@ -61,6 +66,10 @@ public class MainActivity extends Activity {
         contactCaller = new ContactCaller(this);
         notificationReader = new NotificationReader(this);
         youTubeSearcher = new YouTubeSearcher(this);
+        systemSettingsOpener = new SystemSettingsOpener(this);
+        flashlightController = new FlashlightController(this);
+        wifiController = new WifiController(this);
+        bluetoothController = new BluetoothController(this);
         Button speakButton = findViewById(R.id.speakButton);
         Button sampleButton = findViewById(R.id.sampleButton);
         Button micButton = findViewById(R.id.micButton);
@@ -269,8 +278,8 @@ public class MainActivity extends Activity {
         statusText.setText(R.string.contacting_jarvis);
         executor.execute(() -> {
             try {
-                JarvisResult result = serverClient.handleCommand(serverUrl, command);
-                runOnUiThread(() -> handleJarvisResult(result));
+                List<JarvisResult> results = serverClient.handleCommand(serverUrl, command);
+                runOnUiThread(() -> handleJarvisResults(results));
             } catch (Exception exception) {
                 runOnUiThread(() -> statusText.setText(
                         getString(R.string.server_error, exception.getMessage())
@@ -279,13 +288,42 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void handleJarvisResult(JarvisResult result) {
+    private void handleJarvisResults(List<JarvisResult> results) {
+        StringBuilder spokenResponse = new StringBuilder();
+        for (JarvisResult result : results) {
+            if (result.getSpokenResponse() == null || result.getSpokenResponse().isEmpty()) {
+                continue;
+            }
+            if (spokenResponse.length() > 0) {
+                spokenResponse.append(" ");
+            }
+            spokenResponse.append(result.getSpokenResponse());
+        }
+
+        if (spokenResponse.length() > 0) {
+            speakResponse(spokenResponse.toString());
+        }
+
+        for (JarvisResult result : results) {
+            handleJarvisAction(result);
+        }
+    }
+
+    private void handleJarvisAction(JarvisResult result) {
+        if ("stop_speaking".equals(result.getIntent())) {
+            stopSpeaking();
+            return;
+        }
+
         if ("read_notifications".equals(result.getIntent())) {
             handleReadNotifications();
             return;
         }
 
-        speakResponse(result.getSpokenResponse());
+        if ("query_notifications".equals(result.getIntent())) {
+            handleQueryNotifications(result.getTarget());
+            return;
+        }
 
         if ("open_app".equals(result.getIntent())) {
             boolean opened = appLauncher.openApp(result.getTarget());
@@ -303,19 +341,90 @@ public class MainActivity extends Activity {
             return;
         }
 
+        if ("open_system_settings".equals(result.getIntent())) {
+            systemSettingsOpener.open(result.getTarget());
+            return;
+        }
+
+        if ("set_wifi_state".equals(result.getIntent())) {
+            wifiController.openWifiSettings();
+            return;
+        }
+
+        if ("connect_wifi".equals(result.getIntent())) {
+            handleConnectWifi(result);
+            return;
+        }
+
+        if ("set_bluetooth_state".equals(result.getIntent())
+                || "connect_bluetooth".equals(result.getIntent())) {
+            bluetoothController.openBluetoothSettings();
+            return;
+        }
+
+        if ("set_flashlight".equals(result.getIntent())) {
+            handleFlashlight(result.getTarget());
+            return;
+        }
+
         if ("call_contact".equals(result.getIntent())) {
             handleCallContact(result.getTarget());
         }
     }
 
+    private void stopSpeaking() {
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+        }
+        statusText.setText(R.string.stopped_speaking);
+    }
+
+    private void handleFlashlight(String target) {
+        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST);
+            statusText.setText(R.string.camera_permission_needed);
+            return;
+        }
+
+        boolean enabled = "on".equals(target);
+        FlashlightController.Result result = flashlightController.setEnabled(enabled);
+        if (result == FlashlightController.Result.MISSING_PERMISSION) {
+            statusText.setText(R.string.camera_permission_needed);
+        } else if (result == FlashlightController.Result.UNAVAILABLE) {
+            statusText.setText(R.string.flashlight_unavailable);
+        }
+    }
+
     private void handleReadNotifications() {
         if (!notificationReader.hasNotificationAccess()) {
-            speakResponse(getString(R.string.notification_access_needed));
+            statusText.setText(R.string.notification_access_needed);
             notificationReader.openNotificationAccessSettings();
             return;
         }
 
         speakResponse(notificationReader.summarizeNotifications("sir"));
+    }
+
+    private void handleQueryNotifications(String appName) {
+        if (!notificationReader.hasNotificationAccess()) {
+            statusText.setText(R.string.notification_access_needed);
+            notificationReader.openNotificationAccessSettings();
+            return;
+        }
+
+        speakResponse(notificationReader.summarizeNotificationsForApp(appName, "sir"));
+    }
+
+    private void handleConnectWifi(JarvisResult result) {
+        if (result.getWifiPassword() == null || result.getWifiPassword().isEmpty()) {
+            wifiController.openWifiSettings();
+            return;
+        }
+
+        boolean openedAddNetwork = wifiController.openAddNetworkFlow(result.getTarget(), result.getWifiPassword());
+        if (!openedAddNetwork) {
+            statusText.setText(R.string.wifi_manual_connection_needed);
+        }
     }
 
     private void handleCallContact(String target) {

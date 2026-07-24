@@ -19,8 +19,10 @@ DEFAULT_MEMORY: dict[str, Any] = {
             "active_names": ["jarvis"],
             "inactive_old_names": [],
             "max_active_names": 3,
+            "is_awake": True,
         },
     },
+    "wifi_credentials": {},
     "daily": {
         "last_greeting_date": None,
         "last_interaction_at": None,
@@ -122,6 +124,21 @@ class MemoryStore:
         self.save(memory)
         return memory, True
 
+    def set_assistant_awake(self, is_awake: bool) -> dict[str, Any]:
+        memory = self.load()
+        memory["identity"]["assistant"]["is_awake"] = is_awake
+        self.save(memory)
+        return memory
+
+    def remember_wifi_credentials(self, ssid: str, password: str) -> dict[str, Any]:
+        memory = self.load()
+        memory["wifi_credentials"][ssid] = {
+            "ssid": ssid,
+            "password": password,
+        }
+        self.save(memory)
+        return memory
+
     def find_cached_command(self, source_text: str, response_language: str) -> dict[str, Any] | None:
         normalized_source = _normalize_phrase(source_text)
         memory = self.load()
@@ -146,6 +163,15 @@ class MemoryStore:
                         },
                     }
 
+        return None
+
+    def last_spoken_response(self) -> str | None:
+        memory = self.load()
+        for item in reversed(memory["conversation_log"]):
+            response = item.get("spoken_response")
+            command = item.get("command", {})
+            if response and command.get("intent") != "repeat_last_response":
+                return response
         return None
 
     def record_interaction(
@@ -205,7 +231,17 @@ class MemoryStore:
 def _command_cache_key(command: dict[str, Any]) -> str | None:
     intent = command.get("intent")
     target = command.get("target")
-    cacheable_intents = {"call_contact", "open_app", "read_notifications", "search_youtube"}
+    cacheable_intents = {
+        "call_contact",
+        "open_app",
+        "read_notifications",
+        "search_youtube",
+        "open_system_settings",
+        "set_flashlight",
+        "query_notifications",
+        "set_bluetooth_state",
+        "connect_bluetooth",
+    }
     if not intent or intent not in cacheable_intents:
         return None
     return f"{intent}:{target or ''}"

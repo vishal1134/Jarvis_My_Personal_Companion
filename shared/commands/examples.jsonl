@@ -6,9 +6,37 @@
 {"input":"calculator open pannu","output":{"intent":"open_app","target":"calculator","detected_language":"ta-en","response_language":"ta-en"}}
 {"input":"jarvis search vijay songs in youtube","output":{"intent":"search_youtube","target":"vijay songs","detected_language":"en","response_language":"en"}}
 {"input":"jarvis youtube la tamil songs search pannu","output":{"intent":"search_youtube","target":"tamil songs","detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis youtube la munbe vaa search pannu","output":{"intent":"search_youtube","target":"munbe vaa","detected_language":"ta-en","response_language":"ta-en"}}
 {"input":"reply in tamil","output":{"intent":"set_response_language","target":"ta","detected_language":"en","response_language":"ta"}}
 {"input":"english la reply pannu","output":{"intent":"set_response_language","target":"en","detected_language":"ta-en","response_language":"en"}}
 {"input":"jarvis read notifications","output":{"intent":"read_notifications","target":null,"detected_language":"en","response_language":"en"}}
 {"input":"notifications read pannu","output":{"intent":"read_notifications","target":null,"detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"whatsapp la yaaru enaku message pannirukaa jarvis","output":{"intent":"query_notifications","target":"whatsapp","detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis whom have messaged me in whatsapp","output":{"intent":"query_notifications","target":"whatsapp","detected_language":"en","response_language":"en"}}
+{"input":"jarvis wake up","output":{"intent":"wake_assistant","target":null,"detected_language":"en","response_language":"en"}}
+{"input":"jarvis","output":{"intent":"wake_assistant","target":null,"detected_language":"en","response_language":"en"}}
+{"input":"jarvis irukiya","output":{"intent":"wake_assistant","target":null,"detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis what can you do","output":{"intent":"list_commands","target":null,"detected_language":"en","response_language":"en"}}
+{"input":"jarvis enna panna mudiyum","output":{"intent":"list_commands","target":null,"detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis repeat","output":{"intent":"repeat_last_response","target":null,"detected_language":"en","response_language":"en"}}
+{"input":"jarvis marubadi sollu","output":{"intent":"repeat_last_response","target":null,"detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis stop","output":{"intent":"stop_speaking","target":null,"detected_language":"en","response_language":"en"}}
+{"input":"jarvis niruthu","output":{"intent":"stop_speaking","target":null,"detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis what time is it","output":{"intent":"get_time","target":null,"detected_language":"en","response_language":"en"}}
+{"input":"jarvis neram enna","output":{"intent":"get_time","target":null,"detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"time ena jarvis","output":{"intent":"get_time","target":null,"detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis today date","output":{"intent":"get_date","target":null,"detected_language":"en","response_language":"en"}}
+{"input":"jarvis thethi enna","output":{"intent":"get_date","target":null,"detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis wifi settings","output":{"intent":"open_system_settings","target":"wifi","detected_language":"en","response_language":"en"}}
+{"input":"jarvis wifi thira","output":{"intent":"open_system_settings","target":"wifi","detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis bluetooth on pannu","output":{"intent":"set_bluetooth_state","target":"on","detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis sony headphones bluetooth connect pannu","output":{"intent":"connect_bluetooth","target":"sony headphones","detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis wifi on pannu","output":{"intent":"set_wifi_state","target":"on","detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"turn on wifi jarvis","output":{"intent":"set_wifi_state","target":"on","detected_language":"en","response_language":"en"}}
+{"input":"jarvis homewifi connect pannu wifi password vandhu kowsalya at 05 k capital letter","output":{"intent":"connect_wifi","target":"homewifi","detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis turn on flashlight","output":{"intent":"set_flashlight","target":"on","detected_language":"en","response_language":"en"}}
+{"input":"jarvis torch podu","output":{"intent":"set_flashlight","target":"on","detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"jarvis torch on pannu","output":{"intent":"set_flashlight","target":"on","detected_language":"ta-en","response_language":"ta-en"}}
+{"input":"torch off pannu jarvis","output":{"intent":"set_flashlight","target":"off","detected_language":"ta-en","response_language":"ta-en"}}
 {"input":"jarvis change your name to friday","output":{"intent":"change_assistant_name","target":"friday","detected_language":"en","response_language":"en"}}
 {"input":"jarvis add friday as your name","output":{"intent":"add_assistant_name","target":"friday","detected_language":"en","response_language":"en"}}

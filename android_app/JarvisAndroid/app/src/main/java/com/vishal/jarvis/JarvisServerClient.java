@@ -1,6 +1,7 @@
 package com.vishal.jarvis;
 
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,9 +10,11 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JarvisServerClient {
-    public JarvisResult handleCommand(String serverUrl, String commandText) throws Exception {
+    public List<JarvisResult> handleCommand(String serverUrl, String commandText) throws Exception {
         String cleanServerUrl = trimTrailingSlash(serverUrl);
         URL url = new URL(cleanServerUrl + "/commands/handle");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -48,12 +51,13 @@ public class JarvisServerClient {
         }
 
         JSONObject response = new JSONObject(responseBody.toString());
-        JSONObject command = response.getJSONObject("command");
-        return new JarvisResult(
-                command.getString("intent"),
-                command.optString("target", null),
-                response.getString("spoken_response")
-        );
+        if (response.has("commands")) {
+            return parseMultipleResults(response);
+        }
+
+        ArrayList<JarvisResult> results = new ArrayList<>();
+        results.add(parseResult(response.getJSONObject("command"), response.getString("spoken_response")));
+        return results;
     }
 
     private String trimTrailingSlash(String value) {
@@ -61,5 +65,30 @@ public class JarvisServerClient {
             value = value.substring(0, value.length() - 1);
         }
         return value;
+    }
+
+    private List<JarvisResult> parseMultipleResults(JSONObject response) throws Exception {
+        JSONArray commands = response.getJSONArray("commands");
+        JSONArray spokenResponses = response.optJSONArray("spoken_responses");
+        ArrayList<JarvisResult> results = new ArrayList<>();
+
+        for (int index = 0; index < commands.length(); index++) {
+            String spokenResponse = spokenResponses != null && index < spokenResponses.length()
+                    ? spokenResponses.getString(index)
+                    : "";
+            results.add(parseResult(commands.getJSONObject(index), spokenResponse));
+        }
+
+        return results;
+    }
+
+    private JarvisResult parseResult(JSONObject command, String spokenResponse) {
+        JSONObject slots = command.optJSONObject("slots");
+        return new JarvisResult(
+                command.optString("intent", "unknown"),
+                command.optString("target", null),
+                spokenResponse,
+                slots == null ? null : slots.optString("password", null)
+        );
     }
 }

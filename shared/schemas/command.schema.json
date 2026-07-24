@@ -7,7 +7,7 @@
   "properties": {
     "intent": {
       "type": "string",
-      "examples": ["call_contact", "open_app", "search_youtube", "set_response_language", "change_assistant_name"]
+      "examples": ["call_contact", "open_app", "search_youtube", "set_flashlight", "set_response_language"]
     },
     "source_text": {
       "type": "string"

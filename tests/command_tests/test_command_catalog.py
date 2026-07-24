@@ -12,9 +12,10 @@ class CommandCatalogTest(unittest.TestCase):
         self.assertIn("open_app", intents)
         self.assertIn("search_youtube", intents)
         self.assertIn("read_notifications", intents)
+        self.assertIn("wake_assistant", intents)
+        self.assertIn("set_flashlight", intents)
         self.assertIn("change_assistant_name", intents)
 
 
 if __name__ == "__main__":
     unittest.main()
-

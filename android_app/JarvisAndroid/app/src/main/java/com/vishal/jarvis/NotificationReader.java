@@ -80,6 +80,53 @@ public class NotificationReader {
         return summary.toString();
     }
 
+    public String summarizeNotificationsForApp(String appQuery, String title) {
+        if (!hasNotificationAccess()) {
+            return "Please enable notification access for Jarvis, " + title + ".";
+        }
+
+        StatusBarNotification[] notifications = JarvisNotificationListener.getCurrentNotifications();
+        String normalizedQuery = normalize(appQuery);
+        Map<String, Integer> countsBySender = new LinkedHashMap<>();
+        int total = 0;
+
+        for (StatusBarNotification notification : notifications) {
+            String appName = appNameFor(notification.getPackageName());
+            if (!normalize(appName).contains(normalizedQuery)
+                    && !normalize(notification.getPackageName()).contains(normalizedQuery)) {
+                continue;
+            }
+
+            String sender = safeTitle(notification);
+            countsBySender.put(sender, countsBySender.getOrDefault(sender, 0) + 1);
+            total++;
+        }
+
+        if (total == 0) {
+            return "I do not see active " + appQuery + " notifications, " + title + ".";
+        }
+
+        StringBuilder summary = new StringBuilder();
+        summary.append("You have ").append(total);
+        summary.append(total == 1 ? " " : " ");
+        summary.append(appQuery).append(total == 1 ? " notification" : " notifications");
+        summary.append(", ").append(title).append(". ");
+
+        int shown = 0;
+        for (Map.Entry<String, Integer> entry : countsBySender.entrySet()) {
+            if (shown >= 3) {
+                break;
+            }
+            if (shown > 0) {
+                summary.append(", ");
+            }
+            summary.append(entry.getValue()).append(" from ").append(entry.getKey());
+            shown++;
+        }
+        summary.append(".");
+        return summary.toString();
+    }
+
     private String appNameFor(String packageName) {
         PackageManager packageManager = context.getPackageManager();
         try {
@@ -90,5 +137,16 @@ public class NotificationReader {
             return packageName;
         }
     }
-}
 
+    private String safeTitle(StatusBarNotification notification) {
+        CharSequence title = notification.getNotification().extras.getCharSequence("android.title");
+        if (title == null || title.toString().trim().isEmpty()) {
+            return appNameFor(notification.getPackageName());
+        }
+        return title.toString();
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.toLowerCase(Locale.US).trim();
+    }
+}
