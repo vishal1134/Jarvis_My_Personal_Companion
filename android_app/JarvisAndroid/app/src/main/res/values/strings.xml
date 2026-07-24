@@ -35,4 +35,5 @@
     <string name="camera_permission_needed">Allow camera permission, then send the flashlight command again.</string>
     <string name="flashlight_unavailable">Flashlight is not available on this phone.</string>
     <string name="wifi_manual_connection_needed">Wi-Fi settings opened. Complete the connection there.</string>
+    <string name="jarvis_sleeping">Jarvis is quiet. Call Jarvis to wake him.</string>
 </resources>

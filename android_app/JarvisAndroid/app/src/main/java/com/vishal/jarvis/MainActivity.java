@@ -51,6 +51,9 @@ public class MainActivity extends Activity {
     private FlashlightController flashlightController;
     private WifiController wifiController;
     private BluetoothController bluetoothController;
+    private LocalCommandParser localCommandParser;
+    private String lastSpokenResponse = "";
+    private boolean assistantAwake = true;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
@@ -70,6 +73,7 @@ public class MainActivity extends Activity {
         flashlightController = new FlashlightController(this);
         wifiController = new WifiController(this);
         bluetoothController = new BluetoothController(this);
+        localCommandParser = new LocalCommandParser();
         Button speakButton = findViewById(R.id.speakButton);
         Button sampleButton = findViewById(R.id.sampleButton);
         Button micButton = findViewById(R.id.micButton);
@@ -265,13 +269,24 @@ public class MainActivity extends Activity {
         String serverUrl = serverUrlInput.getText().toString().trim();
         String command = commandInput.getText().toString().trim();
 
-        if (serverUrl.isEmpty()) {
-            statusText.setText(R.string.enter_server_url);
+        if (command.isEmpty()) {
+            statusText.setText(R.string.enter_command);
             return;
         }
 
-        if (command.isEmpty()) {
-            statusText.setText(R.string.enter_command);
+        if (!assistantAwake && !usesWakeName(command)) {
+            statusText.setText(R.string.jarvis_sleeping);
+            return;
+        }
+
+        List<JarvisResult> localResults = localCommandParser.parse(command, lastSpokenResponse);
+        if (shouldHandleLocally(command, localResults)) {
+            handleJarvisResults(localResults);
+            return;
+        }
+
+        if (serverUrl.isEmpty()) {
+            handleJarvisResults(localResults);
             return;
         }
 
@@ -281,11 +296,22 @@ public class MainActivity extends Activity {
                 List<JarvisResult> results = serverClient.handleCommand(serverUrl, command);
                 runOnUiThread(() -> handleJarvisResults(results));
             } catch (Exception exception) {
-                runOnUiThread(() -> statusText.setText(
-                        getString(R.string.server_error, exception.getMessage())
-                ));
+                runOnUiThread(() -> handleJarvisResults(localResults));
             }
         });
+    }
+
+    private boolean shouldHandleLocally(String command, List<JarvisResult> results) {
+        if (results.isEmpty()) {
+            return false;
+        }
+
+        for (JarvisResult result : results) {
+            if ("unknown".equals(result.getIntent())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void handleJarvisResults(List<JarvisResult> results) {
@@ -310,6 +336,16 @@ public class MainActivity extends Activity {
     }
 
     private void handleJarvisAction(JarvisResult result) {
+        if ("wake_assistant".equals(result.getIntent())) {
+            assistantAwake = true;
+            return;
+        }
+
+        if ("sleep_assistant".equals(result.getIntent())) {
+            assistantAwake = false;
+            return;
+        }
+
         if ("stop_speaking".equals(result.getIntent())) {
             stopSpeaking();
             return;
@@ -453,12 +489,20 @@ public class MainActivity extends Activity {
     }
 
     private void speakResponse(String spokenResponse) {
+        lastSpokenResponse = spokenResponse;
         statusText.setText(spokenResponse);
         String speechText = spokenResponse
                 .replace(", sir", " sir")
                 .replace(", mam", " mam")
                 .replace(", madam", " madam");
         textToSpeech.speak(speechText, TextToSpeech.QUEUE_FLUSH, null, "jarvis_response");
+    }
+
+    private boolean usesWakeName(String command) {
+        String normalized = command == null ? "" : command.toLowerCase(Locale.US).trim();
+        return "jarvis".equals(normalized)
+                || normalized.startsWith("jarvis ")
+                || normalized.endsWith(" jarvis");
     }
 
     @Override
